@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ARES: NERFED AI</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
+    
+    <style>
+        /* CSS GIỮ NGUYÊN */
+        :root { --neon-cyan: #00f3ff; --neon-red: #ff003c; --neon-gold: #ffd700; --bg-color: #0b0b0b; --panel-bg: rgba(10, 25, 40, 0.95); }
+        body { margin: 0; background-color: var(--bg-color); color: var(--neon-cyan); font-family: 'Courier New', monospace; overflow: hidden; display: flex; justify-content: center; align-items: center; height: 100vh; user-select: none; }
+        .bg-grid { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-image: linear-gradient(rgba(0, 243, 255, 0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 243, 255, 0.05) 1px, transparent 1px); background-size: 40px 40px; z-index: -1; }
+        #app { text-align: center; width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; }
+        .screen { display: none; flex-direction: column; align-items: center; width: 100%; animation: fadeIn 0.4s ease-out; }
+        .screen.active { display: flex; }
+        h1 { font-size: 3rem; text-shadow: 0 0 10px var(--neon-cyan); margin-bottom: 30px; border-bottom: 2px solid var(--neon-cyan); padding-bottom: 10px; }
+        h2 { font-size: 2rem; color: white; margin-bottom: 20px; text-transform: uppercase; }
+        .btn { background: transparent; border: 2px solid var(--neon-cyan); color: var(--neon-cyan); padding: 15px 40px; font-size: 1.2rem; cursor: pointer; margin: 10px; width: 320px; text-transform: uppercase; font-weight: bold; transition: 0.2s; position: relative; overflow: hidden; }
+        .btn:hover { background: var(--neon-cyan); color: black; box-shadow: 0 0 20px var(--neon-cyan); transform: scale(1.02); }
+        .btn-red { border-color: var(--neon-red); color: var(--neon-red); }
+        .btn-red:hover { background: var(--neon-red); color: white; box-shadow: 0 0 20px var(--neon-red); }
+        .btn-gold { border-color: var(--neon-gold); color: var(--neon-gold); }
+        .btn-gold:hover { background: var(--neon-gold); color: black; box-shadow: 0 0 20px var(--neon-gold); }
+        .weapon-container { display: flex; gap: 20px; justify-content: center; }
+        .weapon-card { border: 1px solid white; padding: 20px; width: 220px; cursor: pointer; transition: 0.3s; background: rgba(255,255,255,0.05); }
+        .weapon-card:hover { transform: translateY(-5px); border-color: var(--neon-cyan); background: rgba(0, 243, 255, 0.15); }
+        #game-wrapper { position: relative; width: 1000px; height: 600px; border: 2px solid var(--neon-cyan); background: #151515; box-shadow: 0 0 30px rgba(0, 243, 255, 0.1); }
+        #editorCanvas { position: absolute; top: 0; left: 0; cursor: crosshair; z-index: 10; display: none; }
+        #physics-world { width: 100%; height: 100%; }
+        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); display: none; justify-content: center; align-items: center; z-index: 100; }
+        .modal-content { background: var(--panel-bg); border: 2px solid var(--neon-cyan); padding: 40px; max-width: 600px; text-align: left; }
+        .overlay-ui { position: absolute; top: 15px; left: 15px; z-index: 20; color: white; text-align: left; pointer-events: none; text-shadow: 1px 1px 2px black; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body>
+
+    <div class="bg-grid"></div>
+
+    <div id="app">
+        <div id="menu-screen" class="screen active">
+            <h1>ARES: AI NERF</h1>
+            <button class="btn" onclick="startSetup('AI')">Play with AI</button>
+            <button class="btn" onclick="showMultiScreen()">Play Multiplayer</button>
+            <button class="btn btn-gold" onclick="startMapEditor()">Create Map</button>
+            <div style="height: 10px;"></div>
+            <button class="btn" onclick="openModal('info-modal')">Info</button>
+            <button class="btn btn-red" onclick="exitGame()">Exit</button>
+        </div>
+
+        <div id="multi-setup-screen" class="screen">
+            <h2>SELECT PLAYER COUNT</h2>
+            <button class="btn" onclick="startSetup('MULTI', 2)">2 Players</button>
+            <button class="btn" onclick="startSetup('MULTI', 3)">3 Players</button>
+            <button class="btn" onclick="startSetup('MULTI', 4)">4 Players</button>
+            <button class="btn btn-red" onclick="showScreen('menu-screen')">Back</button>
+        </div>
+
+        <div id="weapon-screen" class="screen">
+            <h2 id="weapon-title">PLAYER 1: SELECT WEAPON</h2>
+            <div class="weapon-container">
+                <div class="weapon-card" onclick="selectWeapon('AA-12')">
+                    <div style="color:var(--neon-red); font-size:1.5rem; font-weight:bold">AA-12</div>
+                    <p>Shotgun<br>Spread: 6 Pellets<br>Damage: Area</p>
+                </div>
+                <div class="weapon-card" onclick="selectWeapon('M60')">
+                    <div style="color:var(--neon-gold); font-size:1.5rem; font-weight:bold">M60</div>
+                    <p>Machine Gun<br>Rate: Fast<br>Ammo: Box</p>
+                </div>
+                <div class="weapon-card" onclick="selectWeapon('SKS')">
+                    <div style="color:var(--neon-cyan); font-size:1.5rem; font-weight:bold">SKS</div>
+                    <p>Rifle<br>Range: Long<br>Precision</p>
+                </div>
+            </div>
+            <button class="btn btn-red" style="margin-top: 20px" onclick="showScreen('menu-screen')">Cancel</button>
+        </div>
+
+        <div id="game-screen" class="screen">
+            <h2 id="screen-heading" style="margin: 0 0 10px 0;">SIMULATION ACTIVE</h2>
+            <div id="game-wrapper">
+                <div class="overlay-ui">
+                    <div id="status-text"></div>
+                    <div id="controls-hint" style="font-size: 0.8rem; color: #aaa; margin-top: 5px;"></div>
+                </div>
+                <canvas id="editorCanvas" width="1000" height="600"></canvas>
+                <div id="physics-world"></div>
+                <div id="game-over-overlay" style="display:none; position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:50; color:white; justify-content:center; align-items:center; flex-direction:column;">
+                    <h1 id="winner-text" style="color:var(--neon-gold)">WINNER FOUND</h1>
+                    <button class="btn" onclick="stopGame()">Return to Menu</button>
+                </div>
+            </div>
+            <button class="btn btn-red" style="margin-top:15px;" onclick="stopGame()">Exit Match</button>
+        </div>
+    </div>
+
+    <div id="info-modal" class="modal">
+        <div class="modal-content">
+            <h3>AI UPDATE: REACTION NERF</h3>
+            <p>The AI now has a <strong>0.9 second delay</strong> before jumping to chase you.</p>
+            <p>This mimics human reaction time and allows you to outmaneuver it on platforms.</p>
+            <button class="btn" onclick="closeModal('info-modal')">Close</button>
+        </div>
+    </div>
+
+    <script>
+        const TILE_SIZE = 40;
+        let gameState = { mode: 'MENU', totalPlayers: 2, selectingPlayer: 1, playerLoadouts: [], mapData: [] };
+
+        function showScreen(id) { document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); document.getElementById(id).classList.add('active'); }
+        function openModal(id) { document.getElementById(id).style.display = 'flex'; }
+        function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+        function exitGame() { if(confirm("Terminate Session?")) window.close(); }
+
+        function startSetup(mode, count=2) {
+            gameState.mode = mode;
+            gameState.totalPlayers = (mode === 'AI') ? 2 : count;
+            gameState.selectingPlayer = 1;
+            gameState.playerLoadouts = [];
+            updateWeaponTitle();
+            showScreen('weapon-screen');
+        }
+
+        function showMultiScreen() { showScreen('multi-setup-screen'); }
+        function updateWeaponTitle() {
+            const colors = ['#48bb78', '#f56565', '#4299e1', '#ffd700'];
+            const title = document.getElementById('weapon-title');
+            title.innerText = `PLAYER ${gameState.selectingPlayer}: SELECT WEAPON`;
+            title.style.color = colors[gameState.selectingPlayer - 1];
+        }
+
+        function selectWeapon(weapon) {
+            gameState.playerLoadouts.push(weapon);
+            if (gameState.mode === 'AI' && gameState.selectingPlayer === 1) {
+                const aiWeapons = ['AA-12', 'M60', 'SKS'];
+                gameState.playerLoadouts.push(aiWeapons[Math.floor(Math.random() * aiWeapons.length)]);
+                initBattle();
+                return;
+            }
+            if (gameState.selectingPlayer < gameState.totalPlayers) {
+                gameState.selectingPlayer++;
+                updateWeaponTitle();
+            } else {
+                initBattle();
+            }
+        }
+
+        function startMapEditor() {
+            gameState.mode = 'EDITOR';
+            showScreen('game-screen');
+            document.getElementById('screen-heading').innerText = "MAP CREATOR";
+            document.getElementById('editorCanvas').style.display = 'block';
+            document.getElementById('physics-world').innerHTML = '';
+            document.getElementById('game-over-overlay').style.display = 'none';
+            document.getElementById('controls-hint').innerText = "Left Click: Draw Wall | Back: Exit";
+            initEditor();
+        }
+
+        const editorCanvas = document.getElementById('editorCanvas');
+        const editorCtx = editorCanvas.getContext('2d');
+        let isDrawing = false;
+        
+        function initEditor() {
+            gameState.mapData = []; renderEditor();
+            editorCanvas.onmousedown = (e) => { isDrawing = true; addWall(e); };
+            editorCanvas.onmousemove = (e) => { if(isDrawing) addWall(e); };
+            editorCanvas.onmouseup = () => { isDrawing = false; };
+        }
+        function addWall(e) {
+            const rect = editorCanvas.getBoundingClientRect();
+            const x = Math.floor((e.clientX - rect.left) / TILE_SIZE) * TILE_SIZE;
+            const y = Math.floor((e.clientY - rect.top) / TILE_SIZE) * TILE_SIZE;
+            if (!gameState.mapData.some(w => w.x === x && w.y === y)) { gameState.mapData.push({x, y}); renderEditor(); }
+        }
+        function renderEditor() {
+            editorCtx.clearRect(0, 0, 1000, 600);
+            editorCtx.strokeStyle = '#333';
+            for(let i=0; i<1000; i+=TILE_SIZE) editorCtx.strokeRect(i,0,1,600);
+            for(let j=0; j<600; j+=TILE_SIZE) editorCtx.strokeRect(0,j,1000,1);
+            editorCtx.fillStyle = '#555'; editorCtx.strokeStyle = '#00f3ff';
+            gameState.mapData.forEach(w => { editorCtx.fillRect(w.x, w.y, TILE_SIZE, TILE_SIZE); editorCtx.strokeRect(w.x, w.y, TILE_SIZE, TILE_SIZE); });
+        }
+
+        const Engine = Matter.Engine, Render = Matter.Render, Runner = Matter.Runner,
+              Bodies = Matter.Bodies, Body = Matter.Body, Composite = Matter.Composite,
+              Events = Matter.Events;
+
+        let engine, render, runner;
+        let players = [];
+        let keys = {};
+
+        function stopGame() {
+            if(runner) Runner.stop(runner);
+            if(engine) Matter.Engine.clear(engine);
+            if(render) { Render.stop(render); render.canvas.remove(); }
+            document.getElementById('editorCanvas').style.display = 'none';
+            showScreen('menu-screen');
+        }
+
+        function initBattle() {
+            showScreen('game-screen');
+            document.getElementById('screen-heading').innerText = "COMBAT SIMULATION";
+            document.getElementById('editorCanvas').style.display = 'none';
+            document.getElementById('game-over-overlay').style.display = 'none';
+            document.getElementById('controls-hint').innerText = "P1: W(Jump)/AD/Space | P2: Up/Arrows/Enter";
+
+            engine = Engine.create();
+            engine.gravity.y = 1.2;
+
+            const el = document.getElementById('physics-world');
+            el.innerHTML = '';
+            render = Render.create({
+                element: el, engine: engine,
+                options: { width: 1000, height: 600, wireframes: false, background: '#151515' }
+            });
+
+            const walls = [
+                Bodies.rectangle(500, 610, 1000, 60, { isStatic: true, label: 'Wall' }), 
+                Bodies.rectangle(-30, 300, 60, 600, { isStatic: true, label: 'Wall' }),
+                Bodies.rectangle(1030, 300, 60, 600, { isStatic: true, label: 'Wall' }),
+                Bodies.rectangle(500, -30, 1000, 60, { isStatic: true, label: 'Wall' })
+            ];
+            gameState.mapData.forEach(w => {
+                walls.push(Bodies.rectangle(w.x + TILE_SIZE/2, w.y + TILE_SIZE/2, TILE_SIZE, TILE_SIZE, { isStatic: true, label: 'Wall' }));
+            });
+            Composite.add(engine.world, walls);
+
+            players = [];
+            const spawnX = [200, 800, 500, 350];
+            const pColors = ['#48bb78', '#f56565', '#4299e1', '#ffd700'];
+            
+            for(let i=0; i<gameState.totalPlayers; i++) {
+                players.push(createPlayer(spawnX[i], 300, pColors[i], gameState.playerLoadouts[i], i+1));
+            }
+
+            keys = {};
+            document.onkeydown = e => { keys[e.code] = true; handleJump(e.code); };
+            document.onkeyup = e => keys[e.code] = false;
+
+            Events.on(engine, 'beforeUpdate', () => {
+                const now = Date.now();
+                players.forEach(p => {
+                    if (p.hp <= 0) return;
+                    const speed = 5;
+                    let vX = 0;
+
+                    if (p.id === 1) {
+                        if (keys['KeyA']) { vX = -speed; p.facing = -1; }
+                        if (keys['KeyD']) { vX = speed; p.facing = 1; }
+                        if (keys['Space']) shoot(p, now);
+                    }
+                    else if (p.id === 2) {
+                        if (gameState.mode === 'AI') {
+                            const target = players[0];
+                            if (target && target.hp > 0) {
+                                const dx = target.body.position.x - p.body.position.x;
+                                const dy = target.body.position.y - p.body.position.y;
+                                const dist = Math.sqrt(dx*dx + dy*dy);
+                                
+                                // Di chuyển
+                                p.facing = dx > 0 ? 1 : -1;
+                                if (dist > 200) vX = speed * p.facing; else if (dist < 100) vX = -speed * p.facing;
+                                
+                                // --- NERFED JUMP LOGIC (DELAY 0.9s) ---
+                                // Nếu người chơi ở cao hơn AI 60px -> Bắt đầu đếm giờ
+                                if (dy < -60) {
+                                    if (p.reactionTimer === 0) {
+                                        p.reactionTimer = now + 900; // Set thời gian phản hồi là 900ms sau
+                                    }
+                                } else {
+                                    // Nếu người chơi nhảy xuống lại, hủy đếm giờ
+                                    p.reactionTimer = 0;
+                                }
+
+                                // Thực hiện nhảy khi đã đến giờ hẹn
+                                if (p.reactionTimer > 0 && now > p.reactionTimer && p.jumpCount < 2) {
+                                    Body.setVelocity(p.body, { x: p.body.velocity.x, y: -12 });
+                                    p.jumpCount++;
+                                    p.reactionTimer = 0; // Reset
+                                }
+
+                                // Bắn (nếu cùng độ cao)
+                                if (Math.abs(dy) < 100) shoot(p, now);
+                            }
+                        } else {
+                            if (keys['ArrowLeft']) { vX = -speed; p.facing = -1; }
+                            if (keys['ArrowRight']) { vX = speed; p.facing = 1; }
+                            if (keys['Enter']) shoot(p, now);
+                        }
+                    }
+                    // P3, P4
+                    else if (p.id === 3) {
+                        if (keys['KeyJ']) { vX = -speed; p.facing = -1; }
+                        if (keys['KeyL']) { vX = speed; p.facing = 1; }
+                        if (keys['KeyO']) shoot(p, now);
+                    }
+                    else if (p.id === 4) {
+                        if (keys['KeyF']) { vX = -speed; p.facing = -1; }
+                        if (keys['KeyH']) { vX = speed; p.facing = 1; }
+                        if (keys['KeyG']) shoot(p, now);
+                    }
+                    Body.setVelocity(p.body, { x: vX, y: p.body.velocity.y });
+                });
+            });
+
+            Events.on(engine, 'collisionStart', (event) => {
+                event.pairs.forEach(pair => {
+                    const { bodyA, bodyB } = pair;
+                    players.forEach(p => {
+                        if ((bodyA === p.body || bodyB === p.body) && (bodyA.label === 'Wall' || bodyB.label === 'Wall')) {
+                             p.jumpCount = 0;
+                        }
+                    });
+                    checkBulletHit(bodyA, bodyB);
+                });
+            });
+
+            Events.on(render, 'afterRender', () => {
+                const ctx = render.context;
+                ctx.fillStyle = '#444'; ctx.strokeStyle = '#00f3ff';
+                walls.forEach(w => { if(w.label === 'Wall') { const { min, max } = w.bounds; ctx.fillRect(min.x, min.y, max.x - min.x, max.y - min.y); ctx.strokeRect(min.x, min.y, max.x - min.x, max.y - min.y); } });
+                players.forEach(p => { if (p.hp > 0) drawCharacter(ctx, p); });
+            });
+
+            Render.run(render);
+            runner = Runner.create();
+            Runner.run(runner, engine);
+        }
+
+        function handleJump(code) {
+            players.forEach(p => {
+                if (p.hp <= 0 || (gameState.mode === 'AI' && p.id === 2)) return;
+                let jumpKey = '';
+                if (p.id === 1) jumpKey = 'KeyW';
+                if (p.id === 2) jumpKey = 'ArrowUp';
+                if (p.id === 3) jumpKey = 'KeyI';
+                if (p.id === 4) jumpKey = 'KeyT';
+                if (code === jumpKey && p.jumpCount < 2) { Body.setVelocity(p.body, { x: p.body.velocity.x, y: -12 }); p.jumpCount++; }
+            });
+        }
+
+        function createPlayer(x, y, color, weapon, id) {
+            const body = Bodies.rectangle(x, y, 30, 60, { inertia: Infinity, frictionAir: 0.05, friction: 0, label: `Player${id}` });
+            Composite.add(engine.world, body);
+            let wStats = { damage: 10, rate: 200, speed: 15, color: 'white' };
+            if(weapon === 'AA-12') wStats = { damage: 4, rate: 700, speed: 12, color: '#ff003c' }; 
+            if(weapon === 'M60') wStats = { damage: 6, rate: 120, speed: 18, color: '#ffd700' };
+            if(weapon === 'SKS') wStats = { damage: 20, rate: 700, speed: 25, color: '#00f3ff' };
+            
+            // THÊM: reactionTimer để tính toán độ trễ của AI
+            return { id, body, color, weapon, stats: wStats, hp: 100, facing: 1, jumpCount: 0, lastShot: 0, reactionTimer: 0 };
+        }
+
+        function shoot(p, now) {
+            if (now - p.lastShot < p.stats.rate) return;
+            p.lastShot = now;
+            
+            if (p.weapon === 'AA-12') {
+                for (let i = 0; i < 6; i++) { 
+                    const bx = p.body.position.x + (25 * p.facing);
+                    const by = p.body.position.y - 5;
+                    const bullet = Bodies.circle(bx, by, 3, { 
+                        label: 'Bullet', damage: p.stats.damage, ownerId: p.id, frictionAir: 0, 
+                        collisionFilter: { group: -1 },
+                        render: { fillStyle: p.stats.color } 
+                    });
+                    const spreadY = (Math.random() - 0.5) * 8; 
+                    const spreadX = (Math.random() - 0.5) * 2;
+                    Body.setVelocity(bullet, { x: (p.stats.speed + spreadX) * p.facing, y: spreadY });
+                    Composite.add(engine.world, bullet);
+                    setTimeout(() => { Composite.remove(engine.world, bullet); }, 800);
+                }
+            } 
+            else {
+                const bx = p.body.position.x + (25 * p.facing);
+                const by = p.body.position.y - 5;
+                const bullet = Bodies.circle(bx, by, 4, { 
+                    label: 'Bullet', damage: p.stats.damage, ownerId: p.id, frictionAir: 0, 
+                    collisionFilter: { group: -1 }, 
+                    render: { fillStyle: p.stats.color } 
+                });
+                Body.setVelocity(bullet, { x: p.stats.speed * p.facing, y: (Math.random() - 0.5) * 1 });
+                Composite.add(engine.world, bullet);
+                setTimeout(() => { Composite.remove(engine.world, bullet); }, 2000);
+            }
+        }
+
+        function checkBulletHit(bA, bB) {
+            let bullet, target;
+            if (bA.label === 'Bullet') { bullet = bA; target = bB; } else if (bB.label === 'Bullet') { bullet = bB; target = bA; }
+            if (bullet) {
+                Composite.remove(engine.world, bullet);
+                if (target.label.startsWith('Player')) {
+                    const id = parseInt(target.label.replace('Player', ''));
+                    if (id !== bullet.ownerId) {
+                        const victim = players.find(p => p.id === id);
+                        if (victim) {
+                            victim.hp -= bullet.damage;
+                            if (victim.hp <= 0) {
+                                const survivors = players.filter(p => p.hp > 0);
+                                if (survivors.length === 1) {
+                                    document.getElementById('game-over-overlay').style.display = 'flex';
+                                    document.getElementById('winner-text').innerText = `PLAYER ${survivors[0].id} WINS!`;
+                                    Runner.stop(runner);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        function drawCharacter(ctx, p) {
+            const { x, y } = p.body.position;
+            ctx.fillStyle = 'red'; ctx.fillRect(x-20, y-50, 40, 5);
+            ctx.fillStyle = '#0f0'; ctx.fillRect(x-20, y-50, 40 * (p.hp/100), 5);
+            const isMoving = Math.abs(p.body.velocity.x) > 0.5;
+            const step = isMoving ? Math.sin(Date.now()/100)*8 : 0;
+            ctx.translate(x, y);
+            ctx.fillStyle = '#222'; ctx.fillRect(-10+step, 15, 8, 15); ctx.fillRect(2-step, 15, 8, 15);
+            ctx.fillStyle = p.color; ctx.fillRect(-15, -15, 30, 30);
+            ctx.beginPath(); ctx.arc(0, -25, 12, 0, Math.PI*2); ctx.fill();
+            ctx.fillStyle = 'white'; ctx.beginPath(); ctx.arc(5*p.facing, -27, 3, 0, Math.PI*2); ctx.fill();
+            const gw = (p.weapon==='SKS'?40:25);
+            ctx.fillStyle = (p.weapon==='M60'?'gold':(p.weapon==='SKS'?'cyan':'red'));
+            ctx.fillRect(10*p.facing, -5, gw*p.facing, 8);
+            ctx.fillStyle = p.color; ctx.beginPath(); ctx.arc(5*p.facing, 0, 5, 0, Math.PI*2); ctx.fill();
+            ctx.translate(-x, -y);
+        }
+    </script>
+</body>
+</html>
