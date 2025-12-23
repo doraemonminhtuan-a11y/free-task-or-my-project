@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ARES: AI WEAPON LIMIT</title>
+    <title>ARES: M60 EVOLUTION</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
     
     <style>
         /* CSS GIỮ NGUYÊN */
-        :root { --neon-cyan: #00f3ff; --neon-red: #ff003c; --neon-gold: #ffd700; --bg-color: #0b0b0b; --panel-bg: rgba(10, 25, 40, 0.95); }
+        :root { --neon-cyan: #00f3ff; --neon-red: #ff003c; --neon-gold: #ffd700; --neon-purple: #bc13fe; --neon-green: #39ff14; --bg-color: #0b0b0b; --panel-bg: rgba(10, 25, 40, 0.95); }
         body { margin: 0; background-color: var(--bg-color); color: var(--neon-cyan); font-family: 'Courier New', monospace; overflow: hidden; display: flex; justify-content: center; align-items: center; height: 100vh; user-select: none; }
         .bg-grid { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-image: linear-gradient(rgba(0, 243, 255, 0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 243, 255, 0.05) 1px, transparent 1px); background-size: 40px 40px; z-index: -1; }
         #app { text-align: center; width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; }
@@ -16,15 +16,23 @@
         .screen.active { display: flex; }
         h1 { font-size: 3rem; text-shadow: 0 0 10px var(--neon-cyan); margin-bottom: 30px; border-bottom: 2px solid var(--neon-cyan); padding-bottom: 10px; }
         h2 { font-size: 2rem; color: white; margin-bottom: 20px; text-transform: uppercase; }
-        .btn { background: transparent; border: 2px solid var(--neon-cyan); color: var(--neon-cyan); padding: 15px 40px; font-size: 1.2rem; cursor: pointer; margin: 10px; width: 320px; text-transform: uppercase; font-weight: bold; transition: 0.2s; position: relative; overflow: hidden; }
+        
+        .btn { background: transparent; border: 2px solid var(--neon-cyan); color: var(--neon-cyan); padding: 15px 40px; font-size: 1.2rem; cursor: pointer; margin: 8px; width: 350px; text-transform: uppercase; font-weight: bold; transition: 0.2s; position: relative; overflow: hidden; }
         .btn:hover { background: var(--neon-cyan); color: black; box-shadow: 0 0 20px var(--neon-cyan); transform: scale(1.02); }
         .btn-red { border-color: var(--neon-red); color: var(--neon-red); }
         .btn-red:hover { background: var(--neon-red); color: white; box-shadow: 0 0 20px var(--neon-red); }
         .btn-gold { border-color: var(--neon-gold); color: var(--neon-gold); }
         .btn-gold:hover { background: var(--neon-gold); color: black; box-shadow: 0 0 20px var(--neon-gold); }
-        .weapon-container { display: flex; gap: 20px; justify-content: center; }
-        .weapon-card { border: 1px solid white; padding: 20px; width: 220px; cursor: pointer; transition: 0.3s; background: rgba(255,255,255,0.05); }
-        .weapon-card:hover { transform: translateY(-5px); border-color: var(--neon-cyan); background: rgba(0, 243, 255, 0.15); }
+        .btn-hell { border-color: var(--neon-purple); color: var(--neon-purple); font-family: 'Impact', sans-serif; letter-spacing: 2px; }
+        .btn-hell:hover { background: var(--neon-purple); color: white; box-shadow: 0 0 30px var(--neon-purple); text-shadow: 0 0 10px white; }
+
+        .card-container { display: flex; gap: 20px; justify-content: center; flex-wrap: wrap; max-width: 1000px; }
+        .card { border: 1px solid white; padding: 15px; width: 200px; cursor: pointer; transition: 0.3s; background: rgba(255,255,255,0.05); display: flex; flex-direction: column; justify-content: center; align-items: center; }
+        .card:hover { transform: translateY(-5px); border-color: var(--neon-cyan); background: rgba(0, 243, 255, 0.15); }
+        .card-title { font-size: 1.2rem; font-weight: bold; margin-bottom: 5px; }
+        .map-preview { width: 100px; height: 60px; border: 1px solid #555; margin-bottom: 10px; position: relative; background: #000; }
+        .map-wall { position: absolute; background: #555; }
+
         #game-wrapper { position: relative; width: 1000px; height: 600px; border: 2px solid var(--neon-cyan); background: #151515; box-shadow: 0 0 30px rgba(0, 243, 255, 0.1); }
         #editorCanvas { position: absolute; top: 0; left: 0; cursor: crosshair; z-index: 10; display: none; }
         #physics-world { width: 100%; height: 100%; }
@@ -40,37 +48,87 @@
 
     <div id="app">
         <div id="menu-screen" class="screen active">
-            <h1>ARES: WEAPON RESTRICTION</h1>
-            <button class="btn" onclick="startSetup('AI')">Play with AI</button>
-            <button class="btn" onclick="showMultiScreen()">Play Multiplayer</button>
-            <button class="btn btn-gold" onclick="startMapEditor()">Create Map</button>
+            <h1>ARES: M60 EVOLUTION</h1>
+            <button class="btn" onclick="goToDifficulty()">Play with AI</button>
+            <button class="btn" onclick="showMapScreen('MULTI')">Play Multiplayer</button>
+            <button class="btn btn-gold" onclick="startMapEditor()">Create Custom Map</button>
             <div style="height: 10px;"></div>
             <button class="btn" onclick="openModal('info-modal')">Info</button>
             <button class="btn btn-red" onclick="exitGame()">Exit</button>
         </div>
 
+        <div id="difficulty-screen" class="screen">
+            <h2>SELECT DIFFICULTY</h2>
+            <button class="btn" onclick="selectDifficulty('EASY')">EASY</button>
+            <button class="btn" onclick="selectDifficulty('NORMAL')">NORMAL</button>
+            <button class="btn btn-gold" onclick="selectDifficulty('HARD')">HARD</button>
+            <button class="btn btn-hell" onclick="selectDifficulty('HELL')">☠ HELL WAY ☠</button>
+            <br>
+            <button class="btn btn-red" onclick="showScreen('menu-screen')">Back</button>
+        </div>
+
+        <div id="map-select-screen" class="screen">
+            <h2>SELECT BATTLEFIELD</h2>
+            <div class="card-container">
+                <div class="card" onclick="selectMap('BASIC')">
+                    <div class="map-preview" style="display:flex; align-items:center; justify-content:center; color:#333; font-size:10px;">[EMPTY]</div>
+                    <div class="card-title" style="color:white">Basic Arena</div>
+                </div>
+                <div class="card" onclick="selectMap('SKYLINE')">
+                    <div class="map-preview">
+                        <div class="map-wall" style="left:20%; top:60%; width:20%; height:5px;"></div>
+                        <div class="map-wall" style="left:60%; top:60%; width:20%; height:5px;"></div>
+                        <div class="map-wall" style="left:40%; top:30%; width:20%; height:5px;"></div>
+                    </div>
+                    <div class="card-title" style="color:var(--neon-cyan)">Skyline</div>
+                </div>
+                <div class="card" onclick="selectMap('CAGE')">
+                    <div class="map-preview">
+                        <div class="map-wall" style="left:45%; top:40%; width:10%; height:40%;"></div>
+                        <div class="map-wall" style="left:10%; top:70%; width:30%; height:5px;"></div>
+                        <div class="map-wall" style="left:60%; top:70%; width:30%; height:5px;"></div>
+                    </div>
+                    <div class="card-title" style="color:var(--neon-red)">The Cage</div>
+                </div>
+                <div class="card" onclick="selectMap('STAIRS')">
+                    <div class="map-preview">
+                        <div class="map-wall" style="left:10%; top:80%; width:15%; height:5px;"></div>
+                        <div class="map-wall" style="left:30%; top:60%; width:15%; height:5px;"></div>
+                        <div class="map-wall" style="left:50%; top:40%; width:15%; height:5px;"></div>
+                        <div class="map-wall" style="left:70%; top:20%; width:15%; height:5px;"></div>
+                    </div>
+                    <div class="card-title" style="color:var(--neon-gold)">Stairway</div>
+                </div>
+                <div class="card" onclick="selectMap('CUSTOM')">
+                    <div class="map-preview" style="border-color:var(--neon-green); display:flex; align-items:center; justify-content:center; color:var(--neon-green); font-size:20px;">?</div>
+                    <div class="card-title" style="color:var(--neon-green)">Custom</div>
+                </div>
+            </div>
+            <button class="btn btn-red" style="margin-top:20px" onclick="showScreen('menu-screen')">Back</button>
+        </div>
+
         <div id="multi-setup-screen" class="screen">
             <h2>SELECT PLAYER COUNT</h2>
-            <button class="btn" onclick="startSetup('MULTI', 2)">2 Players</button>
-            <button class="btn" onclick="startSetup('MULTI', 3)">3 Players</button>
-            <button class="btn" onclick="startSetup('MULTI', 4)">4 Players</button>
-            <button class="btn btn-red" onclick="showScreen('menu-screen')">Back</button>
+            <button class="btn" onclick="setupPlayers(2)">2 Players</button>
+            <button class="btn" onclick="setupPlayers(3)">3 Players</button>
+            <button class="btn" onclick="setupPlayers(4)">4 Players</button>
+            <button class="btn btn-red" onclick="showScreen('map-select-screen')">Back</button>
         </div>
 
         <div id="weapon-screen" class="screen">
             <h2 id="weapon-title">PLAYER 1: SELECT WEAPON</h2>
-            <div class="weapon-container">
-                <div class="weapon-card" onclick="selectWeapon('AA-12')">
-                    <div style="color:var(--neon-red); font-size:1.5rem; font-weight:bold">AA-12</div>
-                    <p>Shotgun<br>Spread: 6 Pellets<br>Damage: Area</p>
+            <div class="card-container">
+                <div class="card" onclick="selectWeapon('AA-12')">
+                    <div class="card-title" style="color:var(--neon-red)">AA-12</div>
+                    <p style="font-size:0.8rem">Shotgun<br>Hold: Charge Power<br>Release: Shoot</p>
                 </div>
-                <div class="weapon-card" onclick="selectWeapon('M60')">
-                    <div style="color:var(--neon-gold); font-size:1.5rem; font-weight:bold">M60</div>
-                    <p>Machine Gun<br>Rate: Fast<br>Ammo: Box</p>
+                <div class="card" onclick="selectWeapon('M60')">
+                    <div class="card-title" style="color:var(--neon-gold)">M60</div>
+                    <p style="font-size:0.8rem">Machine Gun<br>Hold: Spin Up (5s)<br>Speed+Acc increases</p>
                 </div>
-                <div class="weapon-card" onclick="selectWeapon('SKS')">
-                    <div style="color:var(--neon-cyan); font-size:1.5rem; font-weight:bold">SKS</div>
-                    <p>Rifle<br>Range: Long<br>Precision</p>
+                <div class="card" onclick="selectWeapon('SKS')">
+                    <div class="card-title" style="color:var(--neon-cyan)">SKS</div>
+                    <p style="font-size:0.8rem">Rifle<br>Hold: Charge Power<br>Release: Snipe</p>
                 </div>
             </div>
             <button class="btn btn-red" style="margin-top: 20px" onclick="showScreen('menu-screen')">Cancel</button>
@@ -81,7 +139,7 @@
             <div id="game-wrapper">
                 <div class="overlay-ui">
                     <div id="status-text"></div>
-                    <div id="controls-hint" style="font-size: 0.8rem; color: #aaa; margin-top: 5px;"></div>
+                    <div id="difficulty-display" style="color: var(--neon-gold); font-weight: bold;"></div>
                 </div>
                 <canvas id="editorCanvas" width="1000" height="600"></canvas>
                 <div id="physics-world"></div>
@@ -96,12 +154,13 @@
 
     <div id="info-modal" class="modal">
         <div class="modal-content">
-            <h3>AI UPDATE: WEAPON NERF</h3>
-            <p><strong>AI Restrictions:</strong></p>
+            <h3>WEAPON MECHANICS</h3>
+            <p><strong>AA-12 & SKS (Charge Type):</strong></p>
+            <ul><li>Hold Button -> Charge Power -> Release to Shoot.</li></ul>
+            <p><strong>M60 (Spin-Up Type):</strong></p>
             <ul>
-                <li>Jump Reaction Delay: 0.9s</li>
-                <li><strong>Allowed Weapons:</strong> AA-12 & SKS only.</li>
-                <li><span style="color:red">M60 BANNED for AI.</span></li>
+                <li>Hold Button -> Shoots Immediately.</li>
+                <li><strong>Spin Up (5s):</strong> The longer you hold, the faster, farther, and more accurate it gets.</li>
             </ul>
             <button class="btn" onclick="closeModal('info-modal')">Close</button>
         </div>
@@ -109,120 +168,98 @@
 
     <script>
         const TILE_SIZE = 40;
-        let gameState = { mode: 'MENU', totalPlayers: 2, selectingPlayer: 1, playerLoadouts: [], mapData: [] };
+        
+        // PRESET MAPS
+        const PRESET_MAPS = {
+            'BASIC': [],
+            'SKYLINE': [{x: 200, y: 400}, {x: 240, y: 400}, {x: 280, y: 400}, {x: 700, y: 400}, {x: 740, y: 400}, {x: 780, y: 400}, {x: 440, y: 200}, {x: 480, y: 200}, {x: 520, y: 200}],
+            'CAGE': [{x: 480, y: 560}, {x: 480, y: 520}, {x: 480, y: 480}, {x: 480, y: 440}, {x: 100, y: 400}, {x: 140, y: 400}, {x: 180, y: 400}, {x: 800, y: 400}, {x: 840, y: 400}, {x: 880, y: 400}, {x: 300, y: 200}, {x: 700, y: 200}],
+            'STAIRS': [{x: 100, y: 500}, {x: 140, y: 500}, {x: 200, y: 420}, {x: 240, y: 420}, {x: 300, y: 340}, {x: 340, y: 340}, {x: 400, y: 260}, {x: 440, y: 260}, {x: 480, y: 260}, {x: 520, y: 260}, {x: 600, y: 340}, {x: 640, y: 340}, {x: 700, y: 420}, {x: 740, y: 420}, {x: 800, y: 500}, {x: 840, y: 500}]
+        };
+
+        const DIFFICULTIES = {
+            'EASY': { name: 'EASY', aiDelay: 1500, aiChargeSpeed: 0.01, aiCooldownMult: 1.5 },
+            'NORMAL': { name: 'NORMAL', aiDelay: 900, aiChargeSpeed: 0.03, aiCooldownMult: 1.0 },
+            'HARD': { name: 'HARD', aiDelay: 400, aiChargeSpeed: 0.05, aiCooldownMult: 0.8 },
+            'HELL': { name: 'HELL WAY', aiDelay: 50, aiChargeSpeed: 0.1, aiCooldownMult: 0.5 }
+        };
+
+        let gameState = { 
+            mode: 'MENU', totalPlayers: 2, selectingPlayer: 1, playerLoadouts: [], mapData: [], selectedMapKey: 'BASIC', currentDiff: DIFFICULTIES['NORMAL']
+        };
 
         function showScreen(id) { document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); document.getElementById(id).classList.add('active'); }
         function openModal(id) { document.getElementById(id).style.display = 'flex'; }
         function closeModal(id) { document.getElementById(id).style.display = 'none'; }
         function exitGame() { if(confirm("Terminate Session?")) window.close(); }
 
-        function startSetup(mode, count=2) {
-            gameState.mode = mode;
-            gameState.totalPlayers = (mode === 'AI') ? 2 : count;
-            gameState.selectingPlayer = 1;
-            gameState.playerLoadouts = [];
-            updateWeaponTitle();
-            showScreen('weapon-screen');
+        function goToDifficulty() { showScreen('difficulty-screen'); }
+        function selectDifficulty(diffKey) { gameState.currentDiff = DIFFICULTIES[diffKey]; gameState.mode = 'AI'; showMapScreen(); }
+        function showMapScreen(modeOverride) { if(modeOverride) gameState.mode = modeOverride; showScreen('map-select-screen'); }
+        function selectMap(mapKey) { gameState.selectedMapKey = mapKey; if (gameState.mode === 'AI') startWeaponSetup(2); else showScreen('multi-setup-screen'); }
+        function setupPlayers(count) { startWeaponSetup(count); }
+        
+        function startWeaponSetup(count) {
+            gameState.totalPlayers = count; gameState.selectingPlayer = 1; gameState.playerLoadouts = []; updateWeaponTitle(); showScreen('weapon-screen');
         }
-
-        function showMultiScreen() { showScreen('multi-setup-screen'); }
         function updateWeaponTitle() {
             const colors = ['#48bb78', '#f56565', '#4299e1', '#ffd700'];
             const title = document.getElementById('weapon-title');
             title.innerText = `PLAYER ${gameState.selectingPlayer}: SELECT WEAPON`;
             title.style.color = colors[gameState.selectingPlayer - 1];
         }
-
         function selectWeapon(weapon) {
             gameState.playerLoadouts.push(weapon);
-            
-            // LOGIC CHỌN VŨ KHÍ CHO AI ĐÃ ĐƯỢC CẬP NHẬT
+            // AI Logic: Nếu là AI Mode và P1 đã chọn -> Chọn vũ khí cho AI
             if (gameState.mode === 'AI' && gameState.selectingPlayer === 1) {
-                // CHỈ CHO PHÉP AA-12 VÀ SKS
+                // AI được phép dùng cả M60 (nhưng AI dùng M60 sẽ khá bá đạo)
+                // Theo yêu cầu cũ: AI chỉ dùng AA-12/SKS.
+                // Nếu bạn muốn AI dùng M60 thì thêm vào mảng. Ở đây tôi giữ AI AA-12/SKS để cân bằng.
                 const aiWeapons = ['AA-12', 'SKS']; 
-                // M60 đã bị loại bỏ khỏi danh sách của AI
-                
                 gameState.playerLoadouts.push(aiWeapons[Math.floor(Math.random() * aiWeapons.length)]);
                 initBattle();
                 return;
             }
-
             if (gameState.selectingPlayer < gameState.totalPlayers) {
-                gameState.selectingPlayer++;
-                updateWeaponTitle();
+                gameState.selectingPlayer++; updateWeaponTitle();
             } else {
                 initBattle();
             }
         }
 
         function startMapEditor() {
-            gameState.mode = 'EDITOR';
-            showScreen('game-screen');
-            document.getElementById('screen-heading').innerText = "MAP CREATOR";
-            document.getElementById('editorCanvas').style.display = 'block';
-            document.getElementById('physics-world').innerHTML = '';
-            document.getElementById('game-over-overlay').style.display = 'none';
-            document.getElementById('controls-hint').innerText = "Left Click: Draw Wall | Back: Exit";
-            initEditor();
+            gameState.mode = 'EDITOR'; showScreen('game-screen'); document.getElementById('screen-heading').innerText = "MAP CREATOR";
+            document.getElementById('editorCanvas').style.display = 'block'; document.getElementById('physics-world').innerHTML = ''; document.getElementById('game-over-overlay').style.display = 'none'; initEditor();
         }
 
         const editorCanvas = document.getElementById('editorCanvas');
         const editorCtx = editorCanvas.getContext('2d');
         let isDrawing = false;
-        
-        function initEditor() {
-            gameState.mapData = []; renderEditor();
-            editorCanvas.onmousedown = (e) => { isDrawing = true; addWall(e); };
-            editorCanvas.onmousemove = (e) => { if(isDrawing) addWall(e); };
-            editorCanvas.onmouseup = () => { isDrawing = false; };
-        }
-        function addWall(e) {
-            const rect = editorCanvas.getBoundingClientRect();
-            const x = Math.floor((e.clientX - rect.left) / TILE_SIZE) * TILE_SIZE;
-            const y = Math.floor((e.clientY - rect.top) / TILE_SIZE) * TILE_SIZE;
-            if (!gameState.mapData.some(w => w.x === x && w.y === y)) { gameState.mapData.push({x, y}); renderEditor(); }
-        }
-        function renderEditor() {
-            editorCtx.clearRect(0, 0, 1000, 600);
-            editorCtx.strokeStyle = '#333';
-            for(let i=0; i<1000; i+=TILE_SIZE) editorCtx.strokeRect(i,0,1,600);
-            for(let j=0; j<600; j+=TILE_SIZE) editorCtx.strokeRect(0,j,1000,1);
-            editorCtx.fillStyle = '#555'; editorCtx.strokeStyle = '#00f3ff';
-            gameState.mapData.forEach(w => { editorCtx.fillRect(w.x, w.y, TILE_SIZE, TILE_SIZE); editorCtx.strokeRect(w.x, w.y, TILE_SIZE, TILE_SIZE); });
-        }
+        function initEditor() { gameState.mapData = []; renderEditor(); editorCanvas.onmousedown = (e) => { isDrawing = true; addWall(e); }; editorCanvas.onmousemove = (e) => { if(isDrawing) addWall(e); }; editorCanvas.onmouseup = () => { isDrawing = false; }; }
+        function addWall(e) { const rect = editorCanvas.getBoundingClientRect(); const x = Math.floor((e.clientX - rect.left)/TILE_SIZE)*TILE_SIZE; const y = Math.floor((e.clientY - rect.top)/TILE_SIZE)*TILE_SIZE; if (!gameState.mapData.some(w => w.x === x && w.y === y)) { gameState.mapData.push({x, y}); renderEditor(); } }
+        function renderEditor() { editorCtx.clearRect(0,0,1000,600); editorCtx.strokeStyle='#333'; for(let i=0;i<1000;i+=TILE_SIZE)editorCtx.strokeRect(i,0,1,600); for(let j=0;j<600;j+=TILE_SIZE)editorCtx.strokeRect(0,j,1000,1); editorCtx.fillStyle='#555'; editorCtx.strokeStyle='#00f3ff'; gameState.mapData.forEach(w => { editorCtx.fillRect(w.x,w.y,TILE_SIZE,TILE_SIZE); editorCtx.strokeRect(w.x,w.y,TILE_SIZE,TILE_SIZE); }); }
 
-        const Engine = Matter.Engine, Render = Matter.Render, Runner = Matter.Runner,
-              Bodies = Matter.Bodies, Body = Matter.Body, Composite = Matter.Composite,
-              Events = Matter.Events;
+        const Engine = Matter.Engine, Render = Matter.Render, Runner = Matter.Runner, Bodies = Matter.Bodies, Body = Matter.Body, Composite = Matter.Composite, Events = Matter.Events;
+        let engine, render, runner, players = [], keys = {};
 
-        let engine, render, runner;
-        let players = [];
-        let keys = {};
-
-        function stopGame() {
-            if(runner) Runner.stop(runner);
-            if(engine) Matter.Engine.clear(engine);
-            if(render) { Render.stop(render); render.canvas.remove(); }
-            document.getElementById('editorCanvas').style.display = 'none';
-            showScreen('menu-screen');
-        }
+        function stopGame() { if(runner) Runner.stop(runner); if(engine) Matter.Engine.clear(engine); if(render) { Render.stop(render); render.canvas.remove(); } document.getElementById('editorCanvas').style.display='none'; showScreen('menu-screen'); }
 
         function initBattle() {
             showScreen('game-screen');
             document.getElementById('screen-heading').innerText = "COMBAT SIMULATION";
             document.getElementById('editorCanvas').style.display = 'none';
             document.getElementById('game-over-overlay').style.display = 'none';
-            document.getElementById('controls-hint').innerText = "P1: W(Jump)/AD/Space | P2: Up/Arrows/Enter";
+            
+            if(gameState.mode === 'AI') {
+                document.getElementById('difficulty-display').innerText = `DIFFICULTY: ${gameState.currentDiff.name}`;
+                document.getElementById('difficulty-display').style.color = (gameState.currentDiff.name === 'HELL WAY') ? '#bc13fe' : 'gold';
+            } else {
+                document.getElementById('difficulty-display').innerText = "";
+            }
 
-            engine = Engine.create();
-            engine.gravity.y = 1.2;
-
-            const el = document.getElementById('physics-world');
-            el.innerHTML = '';
-            render = Render.create({
-                element: el, engine: engine,
-                options: { width: 1000, height: 600, wireframes: false, background: '#151515' }
-            });
+            engine = Engine.create(); engine.gravity.y = 1.2;
+            const el = document.getElementById('physics-world'); el.innerHTML = '';
+            render = Render.create({ element: el, engine: engine, options: { width: 1000, height: 600, wireframes: false, background: '#151515' } });
 
             const walls = [
                 Bodies.rectangle(500, 610, 1000, 60, { isStatic: true, label: 'Wall' }), 
@@ -230,159 +267,181 @@
                 Bodies.rectangle(1030, 300, 60, 600, { isStatic: true, label: 'Wall' }),
                 Bodies.rectangle(500, -30, 1000, 60, { isStatic: true, label: 'Wall' })
             ];
-            gameState.mapData.forEach(w => {
-                walls.push(Bodies.rectangle(w.x + TILE_SIZE/2, w.y + TILE_SIZE/2, TILE_SIZE, TILE_SIZE, { isStatic: true, label: 'Wall' }));
-            });
+            let mapToLoad = (gameState.selectedMapKey === 'CUSTOM') ? gameState.mapData : PRESET_MAPS[gameState.selectedMapKey];
+            mapToLoad.forEach(w => walls.push(Bodies.rectangle(w.x+TILE_SIZE/2, w.y+TILE_SIZE/2, TILE_SIZE, TILE_SIZE, { isStatic: true, label: 'Wall' })));
             Composite.add(engine.world, walls);
 
             players = [];
             const spawnX = [200, 800, 500, 350];
             const pColors = ['#48bb78', '#f56565', '#4299e1', '#ffd700'];
-            
-            for(let i=0; i<gameState.totalPlayers; i++) {
-                players.push(createPlayer(spawnX[i], 300, pColors[i], gameState.playerLoadouts[i], i+1));
-            }
+            for(let i=0; i<gameState.totalPlayers; i++) players.push(createPlayer(spawnX[i], 300, pColors[i], gameState.playerLoadouts[i], i+1));
 
             keys = {};
             document.onkeydown = e => { keys[e.code] = true; handleJump(e.code); };
-            document.onkeyup = e => keys[e.code] = false;
+            document.onkeyup = e => { keys[e.code] = false; };
 
             Events.on(engine, 'beforeUpdate', () => {
                 const now = Date.now();
                 players.forEach(p => {
                     if (p.hp <= 0) return;
-                    const speed = 5;
-                    let vX = 0;
+                    const speed = 5; let vX = 0;
+                    let shootKey='', leftKey='', rightKey='';
+                    if (p.id === 1) { leftKey='KeyA'; rightKey='KeyD'; shootKey='Space'; }
+                    if (p.id === 2) { leftKey='ArrowLeft'; rightKey='ArrowRight'; shootKey='Enter'; }
+                    if (p.id === 3) { leftKey='KeyJ'; rightKey='KeyL'; shootKey='KeyO'; }
+                    if (p.id === 4) { leftKey='KeyF'; rightKey='KeyH'; shootKey='KeyG'; }
 
-                    if (p.id === 1) {
-                        if (keys['KeyA']) { vX = -speed; p.facing = -1; }
-                        if (keys['KeyD']) { vX = speed; p.facing = 1; }
-                        if (keys['Space']) shoot(p, now);
-                    }
-                    else if (p.id === 2) {
-                        if (gameState.mode === 'AI') {
-                            const target = players[0];
-                            if (target && target.hp > 0) {
-                                const dx = target.body.position.x - p.body.position.x;
-                                const dy = target.body.position.y - p.body.position.y;
-                                const dist = Math.sqrt(dx*dx + dy*dy);
-                                
-                                p.facing = dx > 0 ? 1 : -1;
-                                if (dist > 200) vX = speed * p.facing; else if (dist < 100) vX = -speed * p.facing;
-                                
-                                // REACTION DELAY (900ms)
-                                if (dy < -60) {
-                                    if (p.reactionTimer === 0) p.reactionTimer = now + 900;
+                    if (p.id === 2 && gameState.mode === 'AI') {
+                        const target = players[0];
+                        if (target && target.hp > 0) {
+                            const dx = target.body.position.x - p.body.position.x;
+                            const dy = target.body.position.y - p.body.position.y;
+                            const dist = Math.sqrt(dx*dx + dy*dy);
+                            p.facing = dx > 0 ? 1 : -1;
+                            if (dist > 250) vX = speed * p.facing; else if (dist < 150) vX = -speed * p.facing;
+                            
+                            if (dy < -60) { if (p.reactionTimer === 0) p.reactionTimer = now + gameState.currentDiff.aiDelay; } else { p.reactionTimer = 0; }
+                            if (p.reactionTimer > 0 && now > p.reactionTimer && p.jumpCount < 2) { Body.setVelocity(p.body, { x: p.body.velocity.x, y: -12 }); p.jumpCount++; p.reactionTimer = 0; }
+
+                            // AI SHOOTING
+                            if (Math.abs(dy) < 150) {
+                                // M60 Logic for AI (If AI had M60)
+                                if (p.weapon === 'M60') {
+                                    // AI Just holds spin up
+                                    p.spinUpTime = Math.min(p.spinUpTime + 16.6, 5000);
+                                    const progress = p.spinUpTime / 5000;
+                                    const currentRate = 300 - (220 * progress); 
+                                    if (now - p.lastShot > currentRate) {
+                                        shootM60(p, progress);
+                                        p.lastShot = now;
+                                    }
                                 } else {
-                                    p.reactionTimer = 0;
+                                    // AA-12 / SKS Logic (Charge)
+                                    if (now - p.lastShot > p.stats.rate) {
+                                        if (!p.isCharging) { p.isCharging = true; p.chargeValue = 0; }
+                                        else {
+                                            p.chargeValue += gameState.currentDiff.aiChargeSpeed;
+                                            if (p.chargeValue > (0.4 + Math.random()*0.6)) { shoot(p, p.chargeValue); p.isCharging = false; p.chargeValue = 0; p.lastShot = now; }
+                                        }
+                                    } else { p.isCharging = false; p.chargeValue = 0; }
                                 }
-                                if (p.reactionTimer > 0 && now > p.reactionTimer && p.jumpCount < 2) {
-                                    Body.setVelocity(p.body, { x: p.body.velocity.x, y: -12 });
-                                    p.jumpCount++;
-                                    p.reactionTimer = 0;
-                                }
+                            } else {
+                                p.isCharging = false; p.chargeValue = 0; p.spinUpTime = 0;
+                            }
+                        }
+                    } else {
+                        // HUMAN CONTROL
+                        if (keys[leftKey]) { vX = -speed; p.facing = -1; }
+                        if (keys[rightKey]) { vX = speed; p.facing = 1; }
 
-                                if (Math.abs(dy) < 100) shoot(p, now);
+                        if (keys[shootKey]) {
+                            // M60 LOGIC (SPIN UP)
+                            if (p.weapon === 'M60') {
+                                // Tăng thời gian spin (tối đa 5000ms)
+                                p.spinUpTime = Math.min(p.spinUpTime + 16.6, 5000); // 16.6ms per frame
+                                
+                                // Tính tốc độ bắn hiện tại: Từ 300ms xuống 80ms
+                                const progress = p.spinUpTime / 5000; // 0.0 -> 1.0
+                                const currentRate = 300 - (220 * progress); 
+                                
+                                if (now - p.lastShot > currentRate) {
+                                    shootM60(p, progress);
+                                    p.lastShot = now;
+                                }
+                            } 
+                            // AA-12 / SKS LOGIC (CHARGE)
+                            else {
+                                if (now - p.lastShot > p.stats.rate) {
+                                    if (!p.isCharging) { p.isCharging = true; p.chargeValue = 0.1; }
+                                    else if (p.chargeValue < 1.0) { p.chargeValue += 0.02; }
+                                }
                             }
                         } else {
-                            if (keys['ArrowLeft']) { vX = -speed; p.facing = -1; }
-                            if (keys['ArrowRight']) { vX = speed; p.facing = 1; }
-                            if (keys['Enter']) shoot(p, now);
+                            // RELEASE KEY
+                            if (p.weapon === 'M60') {
+                                // M60: Giảm spin nhanh khi thả nút
+                                p.spinUpTime = Math.max(p.spinUpTime - 100, 0);
+                            } else {
+                                // AA-12/SKS: Bắn khi thả nút
+                                if (p.isCharging) { shoot(p, p.chargeValue); p.isCharging = false; p.chargeValue = 0; p.lastShot = now; }
+                            }
                         }
-                    }
-                    else if (p.id === 3) {
-                        if (keys['KeyJ']) { vX = -speed; p.facing = -1; }
-                        if (keys['KeyL']) { vX = speed; p.facing = 1; }
-                        if (keys['KeyO']) shoot(p, now);
-                    }
-                    else if (p.id === 4) {
-                        if (keys['KeyF']) { vX = -speed; p.facing = -1; }
-                        if (keys['KeyH']) { vX = speed; p.facing = 1; }
-                        if (keys['KeyG']) shoot(p, now);
                     }
                     Body.setVelocity(p.body, { x: vX, y: p.body.velocity.y });
                 });
             });
 
-            Events.on(engine, 'collisionStart', (event) => {
-                event.pairs.forEach(pair => {
-                    const { bodyA, bodyB } = pair;
-                    players.forEach(p => {
-                        if ((bodyA === p.body || bodyB === p.body) && (bodyA.label === 'Wall' || bodyB.label === 'Wall')) {
-                             p.jumpCount = 0;
-                        }
-                    });
-                    checkBulletHit(bodyA, bodyB);
-                });
-            });
-
-            Events.on(render, 'afterRender', () => {
-                const ctx = render.context;
-                ctx.fillStyle = '#444'; ctx.strokeStyle = '#00f3ff';
-                walls.forEach(w => { if(w.label === 'Wall') { const { min, max } = w.bounds; ctx.fillRect(min.x, min.y, max.x - min.x, max.y - min.y); ctx.strokeRect(min.x, min.y, max.x - min.x, max.y - min.y); } });
-                players.forEach(p => { if (p.hp > 0) drawCharacter(ctx, p); });
-            });
-
-            Render.run(render);
-            runner = Runner.create();
-            Runner.run(runner, engine);
+            Events.on(engine, 'collisionStart', (e) => { e.pairs.forEach(p => { players.forEach(pl => { if ((p.bodyA===pl.body||p.bodyB===pl.body) && (p.bodyA.label==='Wall'||p.bodyB.label==='Wall')) pl.jumpCount=0; }); checkBulletHit(p.bodyA, p.bodyB); }); });
+            Events.on(render, 'afterRender', () => { const ctx = render.context; ctx.fillStyle='#444'; ctx.strokeStyle='#00f3ff'; walls.forEach(w=>{if(w.label==='Wall'){const{min,max}=w.bounds;ctx.fillRect(min.x,min.y,max.x-min.x,max.y-min.y);ctx.strokeRect(min.x,min.y,max.x-min.x,max.y-min.y);}}); players.forEach(p=>{if(p.hp>0)drawCharacter(ctx,p);}); });
+            Render.run(render); runner = Runner.create(); Runner.run(runner, engine);
         }
 
-        function handleJump(code) {
-            players.forEach(p => {
-                if (p.hp <= 0 || (gameState.mode === 'AI' && p.id === 2)) return;
-                let jumpKey = '';
-                if (p.id === 1) jumpKey = 'KeyW';
-                if (p.id === 2) jumpKey = 'ArrowUp';
-                if (p.id === 3) jumpKey = 'KeyI';
-                if (p.id === 4) jumpKey = 'KeyT';
-                if (code === jumpKey && p.jumpCount < 2) { Body.setVelocity(p.body, { x: p.body.velocity.x, y: -12 }); p.jumpCount++; }
-            });
-        }
+        function handleJump(code) { players.forEach(p => { if (p.hp<=0 || (gameState.mode==='AI'&&p.id===2)) return; let jk=''; if(p.id===1)jk='KeyW'; if(p.id===2)jk='ArrowUp'; if(p.id===3)jk='KeyI'; if(p.id===4)jk='KeyT'; if(code===jk && p.jumpCount<2){ Body.setVelocity(p.body,{x:p.body.velocity.x,y:-12}); p.jumpCount++; } }); }
 
         function createPlayer(x, y, color, weapon, id) {
             const body = Bodies.rectangle(x, y, 30, 60, { inertia: Infinity, frictionAir: 0.05, friction: 0, label: `Player${id}` });
             Composite.add(engine.world, body);
-            let wStats = { damage: 10, rate: 200, speed: 15, color: 'white' };
-            if(weapon === 'AA-12') wStats = { damage: 4, rate: 700, speed: 12, color: '#ff003c' }; 
-            if(weapon === 'M60') wStats = { damage: 6, rate: 120, speed: 18, color: '#ffd700' };
-            if(weapon === 'SKS') wStats = { damage: 20, rate: 700, speed: 25, color: '#00f3ff' };
+            let wStats = { damage: 10, rate: 500, speed: 15, color: 'white' };
+            if(weapon === 'AA-12') wStats = { damage: 4, rate: 600, speed: 15, color: '#ff003c' }; 
+            // M60 rate is handled dynamically in shoot loop
+            if(weapon === 'M60') wStats = { damage: 6, rate: 0, speed: 20, color: '#ffd700' };
+            if(weapon === 'SKS') wStats = { damage: 25, rate: 800, speed: 30, color: '#00f3ff' };
             
-            return { id, body, color, weapon, stats: wStats, hp: 100, facing: 1, jumpCount: 0, lastShot: 0, reactionTimer: 0 };
+            if (id === 1) wStats.rate = wStats.rate * 0.6; 
+            if (id === 2 && gameState.mode === 'AI') wStats.rate = wStats.rate * gameState.currentDiff.aiCooldownMult;
+
+            return { id, body, color, weapon, stats: wStats, hp: 100, facing: 1, jumpCount: 0, reactionTimer: 0, isCharging: false, chargeValue: 0, lastShot: 0, spinUpTime: 0 };
         }
 
-        function shoot(p, now) {
-            if (now - p.lastShot < p.stats.rate) return;
-            p.lastShot = now;
-            
+        // --- SHOOTING LOGIC FOR AA-12 & SKS (CHARGE) ---
+        function shoot(p, power) {
+            const baseSpeed = p.stats.speed * 0.5;
+            const finalSpeed = baseSpeed + (p.stats.speed * power); 
+            const arcY = (Math.random() * -2) - (power * 5); 
+
             if (p.weapon === 'AA-12') {
                 for (let i = 0; i < 6; i++) { 
-                    const bx = p.body.position.x + (25 * p.facing);
-                    const by = p.body.position.y - 5;
-                    const bullet = Bodies.circle(bx, by, 3, { 
-                        label: 'Bullet', damage: p.stats.damage, ownerId: p.id, frictionAir: 0, 
-                        collisionFilter: { group: -1 },
-                        render: { fillStyle: p.stats.color } 
-                    });
-                    const spreadY = (Math.random() - 0.5) * 8; 
-                    const spreadX = (Math.random() - 0.5) * 2;
-                    Body.setVelocity(bullet, { x: (p.stats.speed + spreadX) * p.facing, y: spreadY });
+                    const bx = p.body.position.x + (25 * p.facing); const by = p.body.position.y - 5;
+                    const bullet = Bodies.circle(bx, by, 3, { label: 'Bullet', damage: p.stats.damage, ownerId: p.id, frictionAir: 0, collisionFilter: { group: -1 }, render: { fillStyle: p.stats.color } });
+                    const spreadY = ((Math.random() - 0.5) * 8) + arcY; const spreadX = (Math.random() - 0.5) * 2;
+                    Body.setVelocity(bullet, { x: (finalSpeed + spreadX) * p.facing, y: spreadY });
                     Composite.add(engine.world, bullet);
-                    setTimeout(() => { Composite.remove(engine.world, bullet); }, 800);
+                    setTimeout(() => { Composite.remove(engine.world, bullet); }, 1000 + (power * 1000));
                 }
             } 
-            else {
-                const bx = p.body.position.x + (25 * p.facing);
-                const by = p.body.position.y - 5;
-                const bullet = Bodies.circle(bx, by, 4, { 
-                    label: 'Bullet', damage: p.stats.damage, ownerId: p.id, frictionAir: 0, 
-                    collisionFilter: { group: -1 }, 
-                    render: { fillStyle: p.stats.color } 
-                });
-                Body.setVelocity(bullet, { x: p.stats.speed * p.facing, y: (Math.random() - 0.5) * 1 });
+            else { // SKS
+                const bx = p.body.position.x + (25 * p.facing); const by = p.body.position.y - 5;
+                const bullet = Bodies.circle(bx, by, 4, { label: 'Bullet', damage: p.stats.damage, ownerId: p.id, frictionAir: 0.005, collisionFilter: { group: -1 }, render: { fillStyle: p.stats.color } });
+                Body.setVelocity(bullet, { x: finalSpeed * p.facing, y: arcY + (Math.random() - 0.5) });
                 Composite.add(engine.world, bullet);
-                setTimeout(() => { Composite.remove(engine.world, bullet); }, 2000);
+                setTimeout(() => { Composite.remove(engine.world, bullet); }, 1500 + (power * 1500));
             }
+        }
+
+        // --- SHOOTING LOGIC FOR M60 (SPIN UP) ---
+        function shootM60(p, progress) {
+            // progress: 0.0 (vừa bắn) -> 1.0 (max tốc độ 5s)
+            
+            // 1. Tốc độ đạn: Tăng dần theo thời gian (15 -> 30)
+            const speed = 15 + (15 * progress);
+            
+            // 2. Độ tản mát (Spread): Giảm dần (Chính xác hơn)
+            // Lúc đầu lệch 3.0, Max spin chỉ lệch 0.5
+            const spreadFactor = 3.0 - (2.5 * progress); 
+            const spreadY = (Math.random() - 0.5) * spreadFactor * 2;
+
+            const bx = p.body.position.x + (35 * p.facing); // Nòng dài hơn
+            const by = p.body.position.y - 2;
+
+            const bullet = Bodies.circle(bx, by, 3, { 
+                label: 'Bullet', damage: p.stats.damage, ownerId: p.id, frictionAir: 0, 
+                collisionFilter: { group: -1 }, 
+                render: { fillStyle: (progress > 0.8) ? '#fff' : p.stats.color } // Đạn trắng khi max tốc
+            });
+
+            Body.setVelocity(bullet, { x: speed * p.facing, y: spreadY });
+            Composite.add(engine.world, bullet);
+            setTimeout(() => { Composite.remove(engine.world, bullet); }, 1500);
         }
 
         function checkBulletHit(bA, bB) {
@@ -414,6 +473,22 @@
             const { x, y } = p.body.position;
             ctx.fillStyle = 'red'; ctx.fillRect(x-20, y-50, 40, 5);
             ctx.fillStyle = '#0f0'; ctx.fillRect(x-20, y-50, 40 * (p.hp/100), 5);
+            
+            // DRAW BAR (Charge OR Spin)
+            if (p.weapon === 'M60') {
+                if (p.spinUpTime > 0) {
+                    ctx.fillStyle = '#444'; ctx.fillRect(x-20, y-60, 40, 4);
+                    // Màu đỏ khi spin thấp, chuyển sang vàng/trắng khi max
+                    ctx.fillStyle = (p.spinUpTime > 4000) ? '#fff' : '#ff4500'; 
+                    ctx.fillRect(x-20, y-60, 40 * (p.spinUpTime/5000), 4);
+                }
+            } else {
+                if (p.isCharging) {
+                    ctx.fillStyle = '#444'; ctx.fillRect(x-20, y-60, 40, 4);
+                    ctx.fillStyle = 'yellow'; ctx.fillRect(x-20, y-60, 40 * p.chargeValue, 4);
+                }
+            }
+
             const isMoving = Math.abs(p.body.velocity.x) > 0.5;
             const step = isMoving ? Math.sin(Date.now()/100)*8 : 0;
             ctx.translate(x, y);
