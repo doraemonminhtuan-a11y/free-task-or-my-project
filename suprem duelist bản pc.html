@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-   <title>ARES - Update now is: NERFED AI</title>
+    <title>ARES: AI WEAPON LIMIT</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
     
     <style>
@@ -40,7 +40,7 @@
 
     <div id="app">
         <div id="menu-screen" class="screen active">
-            <h1>ARES: AI NERF</h1>
+            <h1>ARES: WEAPON RESTRICTION</h1>
             <button class="btn" onclick="startSetup('AI')">Play with AI</button>
             <button class="btn" onclick="showMultiScreen()">Play Multiplayer</button>
             <button class="btn btn-gold" onclick="startMapEditor()">Create Map</button>
@@ -96,9 +96,13 @@
 
     <div id="info-modal" class="modal">
         <div class="modal-content">
-            <h3>AI UPDATE: REACTION NERF</h3>
-            <p>The AI now has a <strong>0.9 second delay</strong> before jumping to chase you.</p>
-            <p>This mimics human reaction time and allows you to outmaneuver it on platforms.</p>
+            <h3>AI UPDATE: WEAPON NERF</h3>
+            <p><strong>AI Restrictions:</strong></p>
+            <ul>
+                <li>Jump Reaction Delay: 0.9s</li>
+                <li><strong>Allowed Weapons:</strong> AA-12 & SKS only.</li>
+                <li><span style="color:red">M60 BANNED for AI.</span></li>
+            </ul>
             <button class="btn" onclick="closeModal('info-modal')">Close</button>
         </div>
     </div>
@@ -131,12 +135,18 @@
 
         function selectWeapon(weapon) {
             gameState.playerLoadouts.push(weapon);
+            
+            // LOGIC CHỌN VŨ KHÍ CHO AI ĐÃ ĐƯỢC CẬP NHẬT
             if (gameState.mode === 'AI' && gameState.selectingPlayer === 1) {
-                const aiWeapons = ['AA-12', 'M60', 'SKS'];
+                // CHỈ CHO PHÉP AA-12 VÀ SKS
+                const aiWeapons = ['AA-12', 'SKS']; 
+                // M60 đã bị loại bỏ khỏi danh sách của AI
+                
                 gameState.playerLoadouts.push(aiWeapons[Math.floor(Math.random() * aiWeapons.length)]);
                 initBattle();
                 return;
             }
+
             if (gameState.selectingPlayer < gameState.totalPlayers) {
                 gameState.selectingPlayer++;
                 updateWeaponTitle();
@@ -257,29 +267,21 @@
                                 const dy = target.body.position.y - p.body.position.y;
                                 const dist = Math.sqrt(dx*dx + dy*dy);
                                 
-                                // Di chuyển
                                 p.facing = dx > 0 ? 1 : -1;
                                 if (dist > 200) vX = speed * p.facing; else if (dist < 100) vX = -speed * p.facing;
                                 
-                                // --- NERFED JUMP LOGIC (DELAY 0.9s) ---
-                                // Nếu người chơi ở cao hơn AI 60px -> Bắt đầu đếm giờ
+                                // REACTION DELAY (900ms)
                                 if (dy < -60) {
-                                    if (p.reactionTimer === 0) {
-                                        p.reactionTimer = now + 900; // Set thời gian phản hồi là 900ms sau
-                                    }
+                                    if (p.reactionTimer === 0) p.reactionTimer = now + 900;
                                 } else {
-                                    // Nếu người chơi nhảy xuống lại, hủy đếm giờ
                                     p.reactionTimer = 0;
                                 }
-
-                                // Thực hiện nhảy khi đã đến giờ hẹn
                                 if (p.reactionTimer > 0 && now > p.reactionTimer && p.jumpCount < 2) {
                                     Body.setVelocity(p.body, { x: p.body.velocity.x, y: -12 });
                                     p.jumpCount++;
-                                    p.reactionTimer = 0; // Reset
+                                    p.reactionTimer = 0;
                                 }
 
-                                // Bắn (nếu cùng độ cao)
                                 if (Math.abs(dy) < 100) shoot(p, now);
                             }
                         } else {
@@ -288,7 +290,6 @@
                             if (keys['Enter']) shoot(p, now);
                         }
                     }
-                    // P3, P4
                     else if (p.id === 3) {
                         if (keys['KeyJ']) { vX = -speed; p.facing = -1; }
                         if (keys['KeyL']) { vX = speed; p.facing = 1; }
@@ -347,7 +348,6 @@
             if(weapon === 'M60') wStats = { damage: 6, rate: 120, speed: 18, color: '#ffd700' };
             if(weapon === 'SKS') wStats = { damage: 20, rate: 700, speed: 25, color: '#00f3ff' };
             
-            // THÊM: reactionTimer để tính toán độ trễ của AI
             return { id, body, color, weapon, stats: wStats, hp: 100, facing: 1, jumpCount: 0, lastShot: 0, reactionTimer: 0 };
         }
 
