@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ARES: ARSENAL EXPANSION</title>
+    <title>ARES: AI RESTRICTIONS</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
     
     <style>
         /* CSS NEON STYLE */
-        :root { --neon-cyan: #00f3ff; --neon-red: #ff003c; --neon-gold: #ffd700; --neon-purple: #bc13fe; --neon-green: #39ff14; --neon-orange: #ff8800; --bg-color: #0b0b0b; --panel-bg: rgba(10, 25, 40, 0.95); }
+        :root { --neon-cyan: #00f3ff; --neon-red: #ff003c; --neon-gold: #ffd700; --neon-purple: #bc13fe; --neon-green: #39ff14; --neon-blue: #42f5e0; --bg-color: #0b0b0b; --panel-bg: rgba(10, 25, 40, 0.95); }
         body { margin: 0; background-color: var(--bg-color); color: var(--neon-cyan); font-family: 'Courier New', monospace; overflow: hidden; display: flex; justify-content: center; align-items: center; height: 100vh; user-select: none; }
         .bg-grid { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-image: linear-gradient(rgba(0, 243, 255, 0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 243, 255, 0.05) 1px, transparent 1px); background-size: 40px 40px; z-index: -1; }
         #app { text-align: center; width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; }
@@ -47,7 +47,7 @@
 
     <div id="app">
         <div id="menu-screen" class="screen active">
-            <h1>ARES: NEW ARSENAL</h1>
+            <h1>ARES: AI RESTRICTIONS</h1>
             <button class="btn" onclick="goToDifficulty()">Play with AI</button>
             <button class="btn" onclick="showMapScreen('MULTI')">Play Multiplayer</button>
             <button class="btn btn-gold" onclick="startMapEditor()">Create Custom Map</button>
@@ -61,7 +61,7 @@
             <button class="btn" onclick="selectDifficulty('EASY')">EASY (Lvl 0)</button>
             <button class="btn" onclick="selectDifficulty('NORMAL')">NORMAL (Lvl 1)</button>
             <button class="btn btn-gold" onclick="selectDifficulty('HARD')">HARD (Lvl 2)</button>
-            <button class="btn btn-hell" onclick="selectDifficulty('HELL')">☠ HELL WAY ☠</button>
+            <button class="btn btn-hell" onclick="selectDifficulty('HELL')">☠ HELL WAY (Lvl 3) ☠</button>
             <br>
             <button class="btn btn-red" onclick="showScreen('menu-screen')">Back</button>
         </div>
@@ -92,19 +92,9 @@
                 <div class="card" onclick="selectWeapon('AA-12')"><div class="card-title" style="color:var(--neon-red)">AA-12</div><p style="font-size:0.7rem">Shotgun<br>Hold: Charge</p></div>
                 <div class="card" onclick="selectWeapon('M60')"><div class="card-title" style="color:var(--neon-gold)">M60</div><p style="font-size:0.7rem">Machine Gun<br>Hold: Spin Up</p></div>
                 <div class="card" onclick="selectWeapon('SKS')"><div class="card-title" style="color:var(--neon-cyan)">SKS</div><p style="font-size:0.7rem">Rifle<br>Hold: Charge</p></div>
-                
-                <div class="card" onclick="selectWeapon('INFERNO')">
-                    <div class="card-title" style="color:var(--neon-orange)">INFERNO</div>
-                    <p style="font-size:0.7rem">Flamethrower<br>Short Range<br>Hold to Burn</p>
-                </div>
-                <div class="card" onclick="selectWeapon('BLADE')">
-                    <div class="card-title" style="color:var(--neon-green)">Z-BLADE</div>
-                    <p style="font-size:0.7rem">Energy Sword<br>Melee<br>Huge Knockback</p>
-                </div>
-                <div class="card" onclick="selectWeapon('C4')">
-                    <div class="card-title" style="color:var(--neon-purple)">C4</div>
-                    <p style="font-size:0.7rem">Remote Bomb<br>1. Throw<br>2. Detonate</p>
-                </div>
+                <div class="card" onclick="selectWeapon('INFERNO')"><div class="card-title" style="color:var(--neon-blue)">INFERNO</div><p style="font-size:0.7rem">Blue Flame<br>Hold: Range+</p></div>
+                <div class="card" onclick="selectWeapon('BLADE')"><div class="card-title" style="color:var(--neon-green)">Z-BLADE</div><p style="font-size:0.7rem">Melee<br>Hold: Wave</p></div>
+                <div class="card" onclick="selectWeapon('C4')"><div class="card-title" style="color:var(--neon-purple)">C4</div><p style="font-size:0.7rem">Bomb<br>Hold: Throw</p></div>
             </div>
             <button class="btn btn-red" style="margin-top: 20px" onclick="showScreen('menu-screen')">Cancel</button>
         </div>
@@ -129,12 +119,12 @@
 
     <div id="info-modal" class="modal">
         <div class="modal-content">
-            <h3>NEW WEAPONS ADDED</h3>
-            <p><strong>Inferno:</strong> Holds to spew fire. Deadly at close range.</p>
-            <p><strong>Z-Blade:</strong> Melee weapon. Hits through walls and knocks enemies back.</p>
-            <p><strong>C4:</strong> Press Shoot to THROW. Press Shoot again to EXPLODE.</p>
-            <hr>
-            <p><strong>Scaling:</strong> Player DMG +4%/lvl | AI DMG +2%/lvl.</p>
+            <h3>AI RESTRICTIONS APPLIED</h3>
+            <p><strong>AI Nerfs:</strong></p>
+            <ul>
+                <li><strong>Banned Weapons:</strong> M60, Inferno, C4. (Only AA-12, SKS, Blade allowed).</li>
+                <li><strong>Crippled Dash:</strong> AI Dash range is 1/10th of Player's. It's just a tiny hop.</li>
+            </ul>
             <button class="btn" onclick="closeModal('info-modal')">Close</button>
         </div>
     </div>
@@ -150,10 +140,10 @@
         };
 
         const DIFFICULTIES = {
-            'EASY':   { name: 'EASY',   level: 0, aiDelay: 1500, aiChargeSpeed: 0.01, aiCooldownMult: 1.5, aiHp: 80 },
-            'NORMAL': { name: 'NORMAL', level: 1, aiDelay: 900,  aiChargeSpeed: 0.03, aiCooldownMult: 1.0, aiHp: 100 },
-            'HARD':   { name: 'HARD',   level: 2, aiDelay: 400,  aiChargeSpeed: 0.05, aiCooldownMult: 0.8, aiHp: 150 },
-            'HELL':   { name: 'HELL WAY', level: 3, aiDelay: 50, aiChargeSpeed: 0.1,  aiCooldownMult: 0.5, aiHp: 300 }
+            'EASY':   { name: 'EASY',   level: 0, aiDelay: 1500, aiChargeSpeed: 0.001, aiCooldownMult: 1.5, aiHp: 80 },
+            'NORMAL': { name: 'NORMAL', level: 1, aiDelay: 900,  aiChargeSpeed: 0.003, aiCooldownMult: 1.0, aiHp: 100 },
+            'HARD':   { name: 'HARD',   level: 2, aiDelay: 400,  aiChargeSpeed: 0.005, aiCooldownMult: 0.8, aiHp: 150 },
+            'HELL':   { name: 'HELL WAY', level: 3, aiDelay: 50, aiChargeSpeed: 0.01,  aiCooldownMult: 0.5, aiHp: 300 }
         };
 
         let gameState = { 
@@ -183,9 +173,8 @@
         function selectWeapon(weapon) {
             gameState.playerLoadouts.push(weapon);
             if (gameState.mode === 'AI' && gameState.selectingPlayer === 1) {
-                // AI WEAPON POOL (Added Inferno & Blade to AI)
-                // C4 removed from AI to prevent suicide
-                const aiWeapons = ['AA-12', 'SKS', 'INFERNO', 'BLADE']; 
+                // RESTRICTED AI WEAPONS: Only AA-12, SKS, BLADE
+                const aiWeapons = ['AA-12', 'SKS', 'BLADE']; 
                 gameState.playerLoadouts.push(aiWeapons[Math.floor(Math.random() * aiWeapons.length)]);
                 initBattle();
                 return;
@@ -247,7 +236,7 @@
             for(let i=0; i<gameState.totalPlayers; i++) players.push(createPlayer(spawnX[i], 300, pColors[i], gameState.playerLoadouts[i], i+1));
 
             keys = {};
-            document.onkeydown = e => { keys[e.code] = true; handleJump(e.code); };
+            document.onkeydown = e => { keys[e.code] = true; handleJump(e.code); handleDash(e.code); };
             document.onkeyup = e => { keys[e.code] = false; };
 
             Events.on(engine, 'beforeUpdate', () => {
@@ -255,14 +244,26 @@
                 players.forEach(p => {
                     if (p.hp <= 0) return;
                     const speed = 5; let vX = 0;
-                    let shootKey='', leftKey='', rightKey='';
-                    if (p.id === 1) { leftKey='KeyA'; rightKey='KeyD'; shootKey='Space'; }
-                    if (p.id === 2) { leftKey='ArrowLeft'; rightKey='ArrowRight'; shootKey='Enter'; }
-                    if (p.id === 3) { leftKey='KeyJ'; rightKey='KeyL'; shootKey='KeyO'; }
-                    if (p.id === 4) { leftKey='KeyF'; rightKey='KeyH'; shootKey='KeyG'; }
+                    let shootKey='', leftKey='', rightKey='', shieldKey='';
+                    if (p.id === 1) { leftKey='KeyA'; rightKey='KeyD'; shootKey='Space'; shieldKey='KeyS'; }
+                    if (p.id === 2) { leftKey='ArrowLeft'; rightKey='ArrowRight'; shootKey='Enter'; shieldKey='ArrowDown'; }
+                    if (p.id === 3) { leftKey='KeyJ'; rightKey='KeyL'; shootKey='KeyO'; shieldKey='KeyK'; }
+                    if (p.id === 4) { leftKey='KeyF'; rightKey='KeyH'; shootKey='KeyG'; shieldKey='KeyV'; }
 
-                    // AI LOGIC
+                    if (p.isDashing && now < p.dashEndTime) {
+                        // DASH NERF LOGIC
+                        let dashSpeed = 25; // Default Human Speed
+                        if (p.id === 2 && gameState.mode === 'AI') {
+                            dashSpeed = 2.5; // AI Nerf: 1/10th speed
+                        }
+                        
+                        vX = dashSpeed * p.facing; 
+                        Body.setVelocity(p.body, { x: vX, y: 0 }); 
+                        return;
+                    } else { p.isDashing = false; }
+
                     if (p.id === 2 && gameState.mode === 'AI') {
+                        // AI LOGIC
                         const target = players[0];
                         if (target && target.hp > 0) {
                             const dx = target.body.position.x - p.body.position.x;
@@ -270,9 +271,8 @@
                             const dist = Math.sqrt(dx*dx + dy*dy);
                             p.facing = dx > 0 ? 1 : -1;
                             
-                            // Move logic based on weapon range
                             let optimalDist = 200;
-                            if (p.weapon === 'INFERNO' || p.weapon === 'BLADE') optimalDist = 60; // Close range for these
+                            if (p.weapon === 'INFERNO' || p.weapon === 'BLADE') optimalDist = 60;
                             
                             if (dist > optimalDist + 50) vX = speed * p.facing; 
                             else if (dist < optimalDist - 50) vX = -speed * p.facing;
@@ -280,14 +280,26 @@
                             if (dy < -60) { if (p.reactionTimer === 0) p.reactionTimer = now + gameState.currentDiff.aiDelay; } else { p.reactionTimer = 0; }
                             if (p.reactionTimer > 0 && now > p.reactionTimer && p.jumpCount < 2) { Body.setVelocity(p.body, { x: p.body.velocity.x, y: -12 }); p.jumpCount++; p.reactionTimer = 0; }
 
-                            // Attack Logic
-                            if (Math.abs(dy) < 150 && dist < 400) {
+                            if (Math.random() < 0.01 && now - p.lastShieldTime > 10000 && !p.isShielding) {
+                                p.isShielding = true; p.shieldStartTime = now;
+                                setTimeout(() => { p.isShielding = false; p.lastShieldTime = Date.now(); }, 2000); 
+                            }
+                            if (Math.random() < 0.01 && now - p.lastDash > 1500) {
+                                p.isDashing = true; p.dashEndTime = now + 200; p.lastDash = now;
+                            }
+
+                            if (Math.abs(dy) < 150 && dist < 400 && !p.isShielding) {
                                 if (p.weapon === 'BLADE') {
-                                    if (dist < 80 && now - p.lastShot > p.stats.rate) { swingBlade(p, now); } // Attack only when close
-                                } else if (p.weapon === 'INFERNO' || p.weapon === 'M60') {
-                                    shootContinuous(p, now); // Just hold trigger
-                                } else {
-                                    // Charge weapons
+                                    if (dist < 80 && now - p.lastShot > p.stats.rate) swingBlade(p, now);
+                                }
+                                else if (p.weapon === 'INFERNO') { // AI won't have this, but just in case
+                                    if (now - p.lastShot > p.stats.rate) {
+                                        if (p.chargeValue < 1.0) p.chargeValue += 0.02; 
+                                        shootContinuous(p, now);
+                                    }
+                                }
+                                else if (p.weapon === 'M60') { shootContinuous(p, now); }
+                                else { // AA-12, SKS
                                     if (now - p.lastShot > p.stats.rate) {
                                         if (!p.isCharging) { p.isCharging = true; p.chargeValue = 0; }
                                         else {
@@ -301,68 +313,88 @@
                             }
                         }
                     } 
-                    // HUMAN LOGIC
+                    // HUMAN CONTROL
                     else {
                         if (keys[leftKey]) { vX = -speed; p.facing = -1; }
                         if (keys[rightKey]) { vX = speed; p.facing = 1; }
 
-                        if (keys[shootKey]) {
-                            // Logic for C4 (Throw/Detonate)
-                            if (p.weapon === 'C4') {
-                                if (!p.isHoldingTrigger) { // Press once check
-                                    p.isHoldingTrigger = true;
-                                    if (p.activeC4) detonateC4(p); else throwC4(p, now);
-                                }
-                            }
-                            // Logic for Blade (Instant Swing)
-                            else if (p.weapon === 'BLADE') {
-                                if (now - p.lastShot > p.stats.rate) swingBlade(p, now);
-                            }
-                            // Logic for Continuous (M60 / Inferno)
-                            else if (p.weapon === 'M60' || p.weapon === 'INFERNO') {
-                                shootContinuous(p, now);
-                            } 
-                            // Logic for Charge (AA-12 / SKS)
-                            else {
-                                if (now - p.lastShot > p.stats.rate) {
-                                    if (!p.isCharging) { p.isCharging = true; p.chargeValue = 0.1; }
-                                    else if (p.chargeValue < 1.0) { p.chargeValue += 0.02; }
-                                }
+                        if (keys[shieldKey]) {
+                            if (now - p.lastShieldTime > 10000) {
+                                if (!p.isShielding) { p.isShielding = true; p.shieldStartTime = now; }
+                                if (now - p.shieldStartTime > 5000) { explodeShield(p); p.isShielding = false; p.lastShieldTime = now; }
                             }
                         } else {
-                            p.isHoldingTrigger = false;
-                            // Release Logic
-                            if (p.weapon === 'M60') p.spinUpTime = Math.max(p.spinUpTime - 100, 0);
-                            else if (p.isCharging) { shootCharge(p, p.chargeValue); p.isCharging = false; p.chargeValue = 0; p.lastShot = now; }
+                            if (p.isShielding) { p.isShielding = false; p.lastShieldTime = now; }
+                        }
+
+                        if (!p.isShielding) {
+                            if (keys[shootKey]) {
+                                let humanChargeSpeed = 0.003; 
+                                if (gameState.mode === 'AI' && gameState.currentDiff.name === 'HELL WAY') humanChargeSpeed = 0.015; 
+
+                                if (p.weapon === 'C4') {
+                                    if (p.activeC4) { if (!p.isHoldingTrigger) { p.isHoldingTrigger = true; detonateC4(p); } } 
+                                    else { if (!p.isCharging) { p.isCharging = true; p.chargeValue = 0.1; } else if (p.chargeValue < 1.0) { p.chargeValue += humanChargeSpeed; } }
+                                }
+                                else if (p.weapon === 'INFERNO') {
+                                    if (!p.isCharging) { p.isCharging = true; p.chargeValue = 0.1; } else if (p.chargeValue < 1.0) { p.chargeValue += humanChargeSpeed; }
+                                    shootContinuous(p, now);
+                                }
+                                else if (p.weapon === 'BLADE') {
+                                    if (now - p.lastShot > p.stats.rate) { if (!p.isCharging) { p.isCharging = true; p.chargeValue = 0.1; } else if (p.chargeValue < 1.0) { p.chargeValue += humanChargeSpeed; } }
+                                }
+                                else if (p.weapon === 'M60') { shootContinuous(p, now); } 
+                                else {
+                                    if (now - p.lastShot > p.stats.rate) { if (!p.isCharging) { p.isCharging = true; p.chargeValue = 0.1; } else if (p.chargeValue < 1.0) { p.chargeValue += humanChargeSpeed; } }
+                                }
+                            } else {
+                                p.isHoldingTrigger = false;
+                                if (p.weapon === 'INFERNO') { p.chargeValue = 0; }
+                                else if (p.weapon === 'C4') { if (p.isCharging) { throwC4(p, now, p.chargeValue); p.isCharging = false; p.chargeValue = 0; p.lastShot = now; } }
+                                else if (p.weapon === 'BLADE') { if (p.isCharging) { if (p.chargeValue > 0.3) { shootBladeWave(p, p.chargeValue); } else { swingBlade(p, now); } p.isCharging = false; p.chargeValue = 0; p.lastShot = now; } }
+                                else if (p.weapon === 'M60') p.spinUpTime = Math.max(p.spinUpTime - 100, 0);
+                                else if (p.isCharging) { shootCharge(p, p.chargeValue); p.isCharging = false; p.chargeValue = 0; p.lastShot = now; }
+                            }
                         }
                     }
                     Body.setVelocity(p.body, { x: vX, y: p.body.velocity.y });
                 });
             });
 
-            Events.on(engine, 'collisionStart', (e) => { e.pairs.forEach(p => { players.forEach(pl => { if ((p.bodyA===pl.body||p.bodyB===pl.body) && (p.bodyA.label==='Wall'||p.bodyB.label==='Wall')) pl.jumpCount=0; }); checkBulletHit(p.bodyA, p.bodyB); }); });
+            Events.on(engine, 'collisionStart', (e) => { e.pairs.forEach(p => { 
+                players.forEach(pl => { if ((p.bodyA===pl.body||p.bodyB===pl.body) && (p.bodyA.label==='Wall'||p.bodyB.label==='Wall')) pl.jumpCount=0; }); 
+                checkBulletHit(p.bodyA, p.bodyB); 
+            }); });
             Events.on(render, 'afterRender', () => { const ctx = render.context; ctx.fillStyle='#444'; ctx.strokeStyle='#00f3ff'; walls.forEach(w=>{if(w.label==='Wall'){const{min,max}=w.bounds;ctx.fillRect(min.x,min.y,max.x-min.x,max.y-min.y);ctx.strokeRect(min.x,min.y,max.x-min.x,max.y-min.y);}}); players.forEach(p=>{if(p.hp>0)drawCharacter(ctx,p);}); });
             Render.run(render); runner = Runner.create(); Runner.run(runner, engine);
         }
 
         function handleJump(code) { players.forEach(p => { if (p.hp<=0 || (gameState.mode==='AI'&&p.id===2)) return; let jk=''; if(p.id===1)jk='KeyW'; if(p.id===2)jk='ArrowUp'; if(p.id===3)jk='KeyI'; if(p.id===4)jk='KeyT'; if(code===jk && p.jumpCount<2){ Body.setVelocity(p.body,{x:p.body.velocity.x,y:-12}); p.jumpCount++; } }); }
 
+        function handleDash(code) {
+            const now = Date.now();
+            players.forEach(p => {
+                if (p.hp <= 0 || (gameState.mode==='AI'&&p.id===2)) return; // AI handled in loop
+                let dashKey = ''; if(p.id === 1) dashKey = 'KeyQ'; if(p.id === 2) dashKey = 'ShiftRight';
+                
+                if (code === dashKey) {
+                    if (now - p.lastDash > 1500) { p.isDashing = true; p.dashEndTime = now + 200; p.lastDash = now; }
+                }
+            });
+        }
+
         function createPlayer(x, y, color, weapon, id) {
             const body = Bodies.rectangle(x, y, 30, 60, { inertia: Infinity, frictionAir: 0.05, friction: 0, label: `Player${id}` });
             Composite.add(engine.world, body);
             
             let wStats = { damage: 10, rate: 500, speed: 15, color: 'white' };
-            // Define Stats
             if(weapon === 'AA-12') wStats = { damage: 4, rate: 600, speed: 15, color: '#ff003c' }; 
             if(weapon === 'M60') wStats = { damage: 6, rate: 0, speed: 20, color: '#ffd700' };
             if(weapon === 'SKS') wStats = { damage: 25, rate: 800, speed: 30, color: '#00f3ff' };
-            
-            // NEW WEAPONS
-            if(weapon === 'INFERNO') wStats = { damage: 2, rate: 50, speed: 8, color: '#ff8800' }; // Fast rate, low dmg per tick
-            if(weapon === 'BLADE') wStats = { damage: 40, rate: 500, speed: 0, color: '#39ff14' }; // High dmg, melee
-            if(weapon === 'C4') wStats = { damage: 80, rate: 1000, speed: 10, color: '#bc13fe' }; // Huge dmg
+            if(weapon === 'INFERNO') wStats = { damage: 1.5, rate: 50, speed: 8, color: '#42f5e0' };
+            if(weapon === 'BLADE') wStats = { damage: 40, rate: 500, speed: 0, color: '#39ff14' };
+            if(weapon === 'C4') wStats = { damage: 80, rate: 500, speed: 10, color: '#bc13fe' };
 
-            // Scaling
             let diffLevel = (gameState.mode === 'AI') ? gameState.currentDiff.level : 1;
             if (id === 1) { wStats.rate *= 0.6; wStats.damage *= (1 + (diffLevel * 0.04)); }
             if (id === 2 && gameState.mode === 'AI') { wStats.rate *= gameState.currentDiff.aiCooldownMult; wStats.damage = (wStats.damage * 0.8) * (1 + (diffLevel * 0.02)); }
@@ -374,13 +406,26 @@
                 id, body, color, weapon, stats: wStats, 
                 hp: currentHp, maxHp: currentHp,
                 facing: 1, jumpCount: 0, reactionTimer: 0, isCharging: false, chargeValue: 0, lastShot: 0, spinUpTime: 0,
-                activeC4: null, bladeVisual: 0, isHoldingTrigger: false
+                activeC4: null, bladeVisual: 0, isHoldingTrigger: false, lastDash: 0, isDashing: false, dashEndTime: 0,
+                isShielding: false, shieldStartTime: 0, lastShieldTime: 0
             };
         }
 
-        // --- SHOOTING FUNCTIONS ---
+        function explodeShield(p) {
+            const blastRadius = 250; const damage = 20; p.shieldBurstVisual = 10; 
+            players.forEach(target => {
+                if (target.id !== p.id && target.hp > 0) {
+                    const dist = Vector.magnitude(Vector.sub(p.body.position, target.body.position));
+                    if (dist < blastRadius) {
+                        target.hp -= damage;
+                        const forceDir = Vector.normalise(Vector.sub(target.body.position, p.body.position));
+                        Body.applyForce(target.body, target.body.position, Vector.mult(forceDir, 0.5));
+                        if (target.hp <= 0) checkWin();
+                    }
+                }
+            });
+        }
 
-        // 1. Charge Shot (AA-12, SKS)
         function shootCharge(p, power) {
             const baseSpeed = p.stats.speed * 0.5; const finalSpeed = baseSpeed + (p.stats.speed * power); const arcY = (Math.random() * -2) - (power * 5); 
             if (p.weapon === 'AA-12') {
@@ -390,7 +435,7 @@
                     const spreadY = ((Math.random() - 0.5) * 8) + arcY; Body.setVelocity(bullet, { x: (finalSpeed + (Math.random()-0.5)*2) * p.facing, y: spreadY });
                     Composite.add(engine.world, bullet); setTimeout(() => { Composite.remove(engine.world, bullet); }, 1000 + (power * 1000));
                 }
-            } else { // SKS
+            } else { 
                 const bx = p.body.position.x + (25 * p.facing); const by = p.body.position.y - 5;
                 const bullet = Bodies.circle(bx, by, 4, { label: 'Bullet', damage: p.stats.damage, ownerId: p.id, frictionAir: 0.005, collisionFilter: { group: -1 }, render: { fillStyle: p.stats.color } });
                 Body.setVelocity(bullet, { x: finalSpeed * p.facing, y: arcY + (Math.random() - 0.5) });
@@ -398,7 +443,6 @@
             }
         }
 
-        // 2. Continuous Shot (M60, Inferno)
         function shootContinuous(p, now) {
             if (p.weapon === 'M60') {
                 p.spinUpTime = Math.min(p.spinUpTime + 16.6, 5000);
@@ -412,32 +456,30 @@
                 }
             } else if (p.weapon === 'INFERNO') {
                 if (now - p.lastShot > p.stats.rate) {
-                    // Fire particles
+                    const currentCharge = p.chargeValue || 0.1; 
+                    const fireSpeed = p.stats.speed + (12 * currentCharge); 
                     for(let i=0; i<2; i++) {
                         const bx = p.body.position.x + (30 * p.facing); const by = p.body.position.y;
-                        const part = Bodies.circle(bx, by, 4 + Math.random()*3, { label: 'Bullet', damage: p.stats.damage, ownerId: p.id, frictionAir: 0.05, collisionFilter: { group: -1 }, render: { fillStyle: '#ff' + Math.floor(Math.random()*99) + '00' } });
-                        Body.setVelocity(part, { x: (p.stats.speed + Math.random()*2) * p.facing, y: (Math.random()-0.5)*3 });
-                        Composite.add(engine.world, part); setTimeout(() => { Composite.remove(engine.world, part); }, 600);
+                        const part = Bodies.circle(bx, by, 4 + Math.random()*3, { label: 'InfernoFlame', damage: p.stats.damage, ownerId: p.id, frictionAir: 0.05, collisionFilter: { group: -1 }, isSensor: true, render: { fillStyle: '#42f5e0' } });
+                        Body.setVelocity(part, { x: (fireSpeed + Math.random()*2) * p.facing, y: (Math.random()-0.5)*3 });
+                        Composite.add(engine.world, part); 
+                        setTimeout(() => { if(!part.isTrap) Composite.remove(engine.world, part); }, 600 + (currentCharge * 400));
                     }
                     p.lastShot = now;
                 }
             }
         }
 
-        // 3. Melee (Blade)
         function swingBlade(p, now) {
-            p.lastShot = now;
-            p.bladeVisual = 10; // Frames to show blade
-            // Check Hit
+            p.lastShot = now; p.bladeVisual = 10;
             players.forEach(target => {
                 if (target.id !== p.id && target.hp > 0) {
                     const dist = Vector.magnitude(Vector.sub(p.body.position, target.body.position));
                     if (dist < 80) {
-                        // Check if facing
                         const dx = target.body.position.x - p.body.position.x;
                         if ((p.facing === 1 && dx > 0) || (p.facing === -1 && dx < 0)) {
                             target.hp -= p.stats.damage;
-                            Body.applyForce(target.body, target.body.position, { x: 0.2 * p.facing, y: -0.1 }); // Knockback
+                            Body.applyForce(target.body, target.body.position, { x: 0.2 * p.facing, y: -0.1 });
                             if (target.hp <= 0) checkWin();
                         }
                     }
@@ -445,54 +487,85 @@
             });
         }
 
-        // 4. C4 Logic
-        function throwC4(p, now) {
+        function shootBladeWave(p, power) {
+            const bx = p.body.position.x + (40 * p.facing); const by = p.body.position.y;
+            const isMaxCharge = (power >= 0.95);
+            const wave = Bodies.rectangle(bx, by, 10, 40, { label: 'BladeWave', damage: p.stats.damage * (1 + power), ownerId: p.id, isSensor: true, isWallPass: isMaxCharge, frictionAir: 0, render: { fillStyle: '#39ff14' } });
+            Body.setVelocity(wave, { x: 25 * p.facing, y: 0 }); Composite.add(engine.world, wave); setTimeout(() => { Composite.remove(engine.world, wave); }, 1000);
+        }
+
+        function throwC4(p, now, power) {
             if (now - p.lastShot < p.stats.rate) return;
             p.lastShot = now;
+            const finalSpeed = 10 + (10 * power); 
             const bx = p.body.position.x + (20 * p.facing); const by = p.body.position.y - 10;
             const bomb = Bodies.rectangle(bx, by, 10, 5, { label: 'C4', ownerId: p.id, friction: 1, restitution: 0, render: { fillStyle: p.stats.color } });
-            Body.setVelocity(bomb, { x: 10 * p.facing, y: -5 });
-            Composite.add(engine.world, bomb);
-            p.activeC4 = bomb;
+            bomb.chargeLevel = power; 
+            Body.setVelocity(bomb, { x: finalSpeed * p.facing, y: -5 - (power * 5) });
+            Composite.add(engine.world, bomb); p.activeC4 = bomb;
         }
 
         function detonateC4(p) {
             if (!p.activeC4) return;
             const bPos = p.activeC4.position;
-            
-            // Explosion visual (simple)
-            // Area Damage
+            const power = p.activeC4.chargeLevel || 0.1;
+            const blastRadius = 100 + (150 * power);
+            const maxDamage = p.stats.damage * (1 + power); 
             players.forEach(target => {
                 if (target.hp > 0) {
                     const dist = Vector.magnitude(Vector.sub(bPos, target.body.position));
-                    if (dist < 150) { // Blast radius
-                        const dmg = p.stats.damage * (1 - (dist/150)); // Falloff
-                        target.hp -= dmg;
-                        // Explosion Force
+                    if (dist < blastRadius) {
+                        const dmg = maxDamage * (1 - (dist/blastRadius)); target.hp -= dmg;
                         const forceDir = Vector.normalise(Vector.sub(target.body.position, bPos));
-                        Body.applyForce(target.body, target.body.position, Vector.mult(forceDir, 0.3));
+                        Body.applyForce(target.body, target.body.position, Vector.mult(forceDir, 0.3 + (power * 0.3)));
                         if (target.hp <= 0) checkWin();
                     }
                 }
             });
-            
-            Composite.remove(engine.world, p.activeC4);
-            p.activeC4 = null;
+            Composite.remove(engine.world, p.activeC4); p.activeC4 = null;
         }
 
         function checkBulletHit(bA, bB) {
-            let bullet, target; if (bA.label === 'Bullet') { bullet = bA; target = bB; } else if (bB.label === 'Bullet') { bullet = bB; target = bA; }
+            let bullet, target; 
+            if (['Bullet', 'InfernoFlame', 'BladeWave', 'C4'].includes(bA.label)) { bullet = bA; target = bB; }
+            else if (['Bullet', 'InfernoFlame', 'BladeWave', 'C4'].includes(bB.label)) { bullet = bB; target = bA; }
+            
             if (bullet) {
-                Composite.remove(engine.world, bullet);
+                // INFERNO TRAP
+                if (bullet.label === 'InfernoFlame' && target.label === 'Wall') {
+                    if (!bullet.isTrap) { bullet.isTrap = true; Body.setStatic(bullet, true); setTimeout(() => { Composite.remove(engine.world, bullet); }, 3000); }
+                    return;
+                }
+
+                // --- SHIELD LOGIC START ---
                 if (target.label.startsWith('Player')) {
                     const id = parseInt(target.label.replace('Player', ''));
+                    // Check if victim owns the bullet (e.g. self fire immunity)
                     if (id !== bullet.ownerId) {
                         const victim = players.find(p => p.id === id);
                         if (victim) {
-                            victim.hp -= bullet.damage;
-                            if (victim.hp <= 0) checkWin();
+                            // IF SHIELDING: Block Bullet & BladeWave
+                            if (victim.isShielding) {
+                                let blocked = true;
+                                if (bullet.label === 'InfernoFlame' && bullet.isTrap) blocked = false; // Trap goes under shield
+                                if (bullet.label === 'C4' && bullet.chargeLevel >= 0.95) blocked = false;
+                                
+                                if (blocked) {
+                                    if(bullet.label !== 'C4') Composite.remove(engine.world, bullet);
+                                    return; // BLOCKED!
+                                }
+                            }
+
+                            victim.hp -= bullet.damage; 
+                            if (victim.hp <= 0) checkWin(); 
+                            if (!bullet.isTrap && bullet.label !== 'BladeWave') Composite.remove(engine.world, bullet);
                         }
                     }
+                }
+                // --- SHIELD LOGIC END ---
+
+                else if (target.label === 'Wall' && !bullet.isTrap && bullet.label !== 'C4' && !bullet.isWallPass) {
+                    Composite.remove(engine.world, bullet);
                 }
             }
         }
@@ -504,19 +577,34 @@
 
         function drawCharacter(ctx, p) {
             const { x, y } = p.body.position;
+            const now = Date.now();
+
+            if (p.isShielding) {
+                ctx.strokeStyle = `rgba(0, 243, 255, ${0.5 + (now - p.shieldStartTime)/10000})`; ctx.lineWidth = 4;
+                ctx.beginPath(); ctx.arc(x, y, 40, 0, Math.PI*2); ctx.stroke();
+                if (now - p.shieldStartTime > 4000) { ctx.fillStyle = ((Math.floor(now/100)%2)===0) ? 'white' : 'red'; ctx.beginPath(); ctx.arc(x, y, 10, 0, Math.PI*2); ctx.fill(); }
+            }
+            if (p.shieldBurstVisual > 0) {
+                ctx.strokeStyle = 'white'; ctx.lineWidth = 10; ctx.beginPath(); ctx.arc(x, y, 200, 0, Math.PI*2); ctx.stroke(); p.shieldBurstVisual--;
+            }
+
             ctx.fillStyle = 'red'; ctx.fillRect(x-20, y-50, 40, 5);
             ctx.fillStyle = '#0f0'; ctx.fillRect(x-20, y-50, 40 * Math.max(0, p.hp / p.maxHp), 5);
             
-            // Draw Charge/Spin Bar
+            if (now - p.lastDash < 1500) { ctx.fillStyle = '#00f3ff'; ctx.fillRect(x-20, y-42, 40 * ((now - p.lastDash)/1500), 3); } 
+            else { ctx.fillStyle = '#00f3ff'; ctx.fillRect(x-20, y-42, 40, 3); }
+
+            if (now - p.lastShieldTime < 10000) { ctx.fillStyle = '#bc13fe'; ctx.fillRect(x-20, y-34, 40 * ((now - p.lastShieldTime)/10000), 3); } 
+            else { ctx.fillStyle = '#bc13fe'; ctx.fillRect(x-20, y-34, 40, 3); }
+
             if (p.weapon === 'M60' && p.spinUpTime > 0) {
                 ctx.fillStyle = '#444'; ctx.fillRect(x-20, y-60, 40, 4); ctx.fillStyle = '#ff4500'; ctx.fillRect(x-20, y-60, 40 * (p.spinUpTime/5000), 4);
-            } else if ((p.weapon === 'AA-12' || p.weapon === 'SKS') && p.isCharging) {
+            } else if ((p.weapon === 'AA-12' || p.weapon === 'SKS' || p.weapon === 'C4' || p.weapon === 'INFERNO' || p.weapon === 'BLADE') && p.isCharging) {
                 ctx.fillStyle = '#444'; ctx.fillRect(x-20, y-60, 40, 4); ctx.fillStyle = 'yellow'; ctx.fillRect(x-20, y-60, 40 * p.chargeValue, 4);
             } else if (p.weapon === 'C4' && p.activeC4) {
                 ctx.fillStyle = '#bc13fe'; ctx.font = "10px Arial"; ctx.fillText("ACTIVE", x-15, y-60);
             }
 
-            // Draw Blade Visual
             if (p.bladeVisual > 0) {
                 ctx.strokeStyle = p.stats.color; ctx.lineWidth = 3; ctx.beginPath();
                 ctx.arc(x, y, 50, (p.facing===1?-0.5:2.5), (p.facing===1?0.5:3.5)); ctx.stroke();
@@ -529,12 +617,10 @@
             ctx.beginPath(); ctx.arc(0, -25, 12, 0, Math.PI*2); ctx.fill();
             ctx.fillStyle = 'white'; ctx.beginPath(); ctx.arc(5*p.facing, -27, 3, 0, Math.PI*2); ctx.fill();
             
-            // Gun visual change based on type
             ctx.fillStyle = p.stats.color;
-            if(p.weapon === 'BLADE') { /* No gun body */ }
+            if(p.weapon === 'BLADE') { ctx.beginPath(); ctx.moveTo(5*p.facing, 0); ctx.lineTo(35*p.facing, 0); ctx.lineWidth = 4; ctx.strokeStyle = (p.isCharging ? 'white' : '#39ff14'); ctx.stroke(); }
             else if (p.weapon === 'INFERNO') { ctx.fillRect(10*p.facing, -2, 20*p.facing, 12); }
             else { ctx.fillRect(10*p.facing, -5, 25*p.facing, 8); }
-            
             ctx.fillStyle = p.color; ctx.beginPath(); ctx.arc(5*p.facing, 0, 5, 0, Math.PI*2); ctx.fill();
             ctx.translate(-x, -y);
         }
