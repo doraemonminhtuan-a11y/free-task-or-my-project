@@ -3,135 +3,200 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ARES: AI RESTRICTIONS</title>
+    <title>ARES: SHOP UPDATE</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
     
     <style>
-        /* CSS NEON STYLE */
-        :root { --neon-cyan: #00f3ff; --neon-red: #ff003c; --neon-gold: #ffd700; --neon-purple: #bc13fe; --neon-green: #39ff14; --neon-blue: #42f5e0; --bg-color: #0b0b0b; --panel-bg: rgba(10, 25, 40, 0.95); }
-        body { margin: 0; background-color: var(--bg-color); color: var(--neon-cyan); font-family: 'Courier New', monospace; overflow: hidden; display: flex; justify-content: center; align-items: center; height: 100vh; user-select: none; }
-        .bg-grid { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-image: linear-gradient(rgba(0, 243, 255, 0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 243, 255, 0.05) 1px, transparent 1px); background-size: 40px 40px; z-index: -1; }
-        #app { text-align: center; width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; }
-        .screen { display: none; flex-direction: column; align-items: center; width: 100%; animation: fadeIn 0.4s ease-out; }
+        /* SUPREME STYLE + SHOP UI */
+        :root {
+            --primary: #3498db; --danger: #e74c3c; --warning: #f1c40f; --success: #2ecc71;
+            --dark: #2c3e50; --panel: #34495e; --text: #ecf0f1; --purple: #9b59b6;
+        }
+        body { margin: 0; background: var(--dark); color: var(--text); font-family: 'Verdana', sans-serif; overflow: hidden; width: 100vw; height: 100vh; user-select: none; }
+        
+        #app { text-align: center; width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; background: radial-gradient(circle at center, #3b536b 0%, #2c3e50 100%); }
+        .screen { display: none; flex-direction: column; align-items: center; width: 100%; animation: popIn 0.3s; z-index: 10; }
         .screen.active { display: flex; }
-        h1 { font-size: 3rem; text-shadow: 0 0 10px var(--neon-cyan); margin-bottom: 30px; border-bottom: 2px solid var(--neon-cyan); padding-bottom: 10px; }
-        h2 { font-size: 2rem; color: white; margin-bottom: 20px; text-transform: uppercase; }
-        .btn { background: transparent; border: 2px solid var(--neon-cyan); color: var(--neon-cyan); padding: 15px 40px; font-size: 1.2rem; cursor: pointer; margin: 8px; width: 350px; text-transform: uppercase; font-weight: bold; transition: 0.2s; position: relative; overflow: hidden; }
-        .btn:hover { background: var(--neon-cyan); color: black; box-shadow: 0 0 20px var(--neon-cyan); transform: scale(1.02); }
-        .btn-red { border-color: var(--neon-red); color: var(--neon-red); }
-        .btn-red:hover { background: var(--neon-red); color: white; box-shadow: 0 0 20px var(--neon-red); }
-        .btn-gold { border-color: var(--neon-gold); color: var(--neon-gold); }
-        .btn-gold:hover { background: var(--neon-gold); color: black; box-shadow: 0 0 20px var(--neon-gold); }
-        .btn-hell { border-color: var(--neon-purple); color: var(--neon-purple); font-family: 'Impact', sans-serif; letter-spacing: 2px; }
-        .btn-hell:hover { background: var(--neon-purple); color: white; box-shadow: 0 0 30px var(--neon-purple); text-shadow: 0 0 10px white; }
+        @keyframes popIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
 
-        .card-container { display: flex; gap: 15px; justify-content: center; flex-wrap: wrap; max-width: 1000px; }
-        .card { border: 1px solid white; padding: 10px; width: 180px; cursor: pointer; transition: 0.3s; background: rgba(255,255,255,0.05); display: flex; flex-direction: column; justify-content: center; align-items: center; }
-        .card:hover { transform: translateY(-5px); border-color: var(--neon-cyan); background: rgba(0, 243, 255, 0.15); }
-        .card-title { font-size: 1.1rem; font-weight: bold; margin-bottom: 5px; }
-        .map-preview { width: 100px; height: 60px; border: 1px solid #555; margin-bottom: 10px; position: relative; background: #000; }
-        .map-wall { position: absolute; background: #555; }
+        h1 { font-family: 'Arial Black', sans-serif; font-size: 3.5rem; color: var(--warning); text-shadow: 3px 3px 0 #000; -webkit-text-stroke: 1px black; margin-bottom: 20px; }
+        h2 { font-size: 2rem; margin-bottom: 20px; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); }
 
-        #game-wrapper { position: relative; width: 1000px; height: 600px; border: 2px solid var(--neon-cyan); background: #151515; box-shadow: 0 0 30px rgba(0, 243, 255, 0.1); }
+        /* COIN DISPLAY */
+        .coin-display {
+            background: rgba(0,0,0,0.5); padding: 10px 20px; border-radius: 20px; border: 2px solid var(--warning);
+            color: var(--warning); font-weight: bold; font-size: 1.2rem; margin-bottom: 20px; display: flex; align-items: center; gap: 10px;
+        }
+        .coin-icon { width: 20px; height: 20px; background: var(--warning); border-radius: 50%; border: 2px solid #f39c12; box-shadow: inset -2px -2px 5px rgba(0,0,0,0.3); display:inline-block;}
+
+        /* BUTTONS */
+        .btn { background: var(--primary); border: none; border-bottom: 5px solid #2980b9; color: white; padding: 15px 40px; font-size: 1.3rem; font-weight: bold; cursor: pointer; margin: 10px; width: 350px; border-radius: 10px; font-family: 'Arial Black'; text-shadow: 1px 1px 2px rgba(0,0,0,0.3); transition:0.1s; }
+        .btn:active { transform: translateY(3px); border-bottom: 2px solid #2980b9; }
+        .btn:hover { filter: brightness(1.1); }
+        .btn-red { background: var(--danger); border-color: #c0392b; }
+        .btn-gold { background: var(--warning); border-color: #f39c12; color: #2c3e50; }
+        .btn-hell { background: #8e44ad; border-color: #6c3483; }
+
+        /* CARDS */
+        .card-container { display: flex; gap: 15px; justify-content: center; flex-wrap: wrap; max-width: 90%; }
+        .card { background: var(--panel); border: 3px solid white; border-radius: 15px; padding: 15px; width: 160px; cursor: pointer; transition: 0.2s; box-shadow: 0 5px 15px rgba(0,0,0,0.3); position: relative; overflow: hidden; }
+        .card:hover { transform: translateY(-5px); border-color: var(--warning); }
+        .card-title { font-weight: bold; margin-bottom: 5px; font-family: 'Arial Black'; }
+        
+        /* SHOP STYLES */
+        .card.locked { filter: grayscale(1); opacity: 0.8; }
+        .card.locked:hover { filter: grayscale(0.5); }
+        .price-tag { background: var(--warning); color: #2c3e50; padding: 3px 10px; border-radius: 10px; font-size: 0.8rem; font-weight: bold; position: absolute; top: 5px; right: 5px; }
+        .owned-tag { background: var(--success); color: white; padding: 3px 10px; border-radius: 10px; font-size: 0.8rem; font-weight: bold; position: absolute; top: 5px; right: 5px; }
+
+        .map-preview { width: 100px; height: 60px; border: 2px solid #bdc3c7; margin: 0 auto 10px; background: #2c3e50; position: relative; }
+        .map-wall { position: absolute; background: #95a5a6; }
+
+        #game-wrapper { position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; background: #2c3e50; overflow: hidden; }
         #editorCanvas { position: absolute; top: 0; left: 0; cursor: crosshair; z-index: 10; display: none; }
-        #physics-world { width: 100%; height: 100%; }
-        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); display: none; justify-content: center; align-items: center; z-index: 100; }
-        .modal-content { background: var(--panel-bg); border: 2px solid var(--neon-cyan); padding: 40px; max-width: 600px; text-align: left; }
-        .overlay-ui { position: absolute; top: 15px; left: 15px; z-index: 20; color: white; text-align: left; pointer-events: none; text-shadow: 1px 1px 2px black; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .overlay-ui { position: absolute; top: 20px; left: 20px; z-index: 20; color: white; text-align: left; pointer-events: none; text-shadow: 2px 2px 2px black; font-family: 'Arial Black'; font-size: 1.2rem; }
+        #game-over-overlay { display:none; position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:50; color:white; justify-content:center; align-items:center; flex-direction:column; }
+        #winner-text { font-size: 4rem; color: var(--warning); text-shadow: 4px 4px 0 #000; margin-bottom: 10px; }
+        #reward-text { font-size: 2rem; color: var(--success); margin-bottom: 30px; font-weight: bold; }
+
+        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: none; justify-content: center; align-items: center; z-index: 100; }
+        .modal-content { background: white; color: #2c3e50; border-radius: 15px; padding: 40px; max-width: 600px; text-align: left; }
     </style>
 </head>
 <body>
 
-    <div class="bg-grid"></div>
-
     <div id="app">
         <div id="menu-screen" class="screen active">
-            <h1>ARES: AI RESTRICTIONS</h1>
-            <button class="btn" onclick="goToDifficulty()">Play with AI</button>
-            <button class="btn" onclick="showMapScreen('MULTI')">Play Multiplayer</button>
-            <button class="btn btn-gold" onclick="startMapEditor()">Create Custom Map</button>
+            <h1>ARES: WEAPON SHOP</h1>
+            <div class="coin-display" id="menu-coins"><div class="coin-icon"></div> <span id="coin-val">0</span></div>
+            <button class="btn" onclick="goToDifficulty()">VS AI (EARN COINS)</button>
+            <button class="btn" onclick="showMapScreen('MULTI')">2-4 PLAYERS</button>
+            <button class="btn btn-gold" onclick="startMapEditor()">MAP EDITOR</button>
             <div style="height: 10px;"></div>
-            <button class="btn" onclick="openModal('info-modal')">Info</button>
-            <button class="btn btn-red" onclick="exitGame()">Exit</button>
+            <button class="btn" onclick="openModal('info-modal')">HELP / INFO</button>
+            <button class="btn btn-red" onclick="exitGame()">QUIT</button>
         </div>
 
         <div id="difficulty-screen" class="screen">
             <h2>SELECT DIFFICULTY</h2>
-            <button class="btn" onclick="selectDifficulty('EASY')">EASY (Lvl 0)</button>
-            <button class="btn" onclick="selectDifficulty('NORMAL')">NORMAL (Lvl 1)</button>
-            <button class="btn btn-gold" onclick="selectDifficulty('HARD')">HARD (Lvl 2)</button>
-            <button class="btn btn-hell" onclick="selectDifficulty('HELL')">☠ HELL WAY (Lvl 3) ☠</button>
+            <button class="btn" onclick="selectDifficulty('EASY')">EASY (Low Reward)</button>
+            <button class="btn" onclick="selectDifficulty('NORMAL')">NORMAL (Standard)</button>
+            <button class="btn btn-gold" onclick="selectDifficulty('HARD')">HARD (Bonus)</button>
+            <button class="btn btn-hell" onclick="selectDifficulty('HELL')">☠ HELL WAY (+300 COINS) ☠</button>
             <br>
-            <button class="btn btn-red" onclick="showScreen('menu-screen')">Back</button>
+            <button class="btn btn-red" onclick="showScreen('menu-screen')">BACK</button>
         </div>
 
         <div id="map-select-screen" class="screen">
-            <h2>SELECT BATTLEFIELD</h2>
+            <h2>SELECT MAP</h2>
             <div class="card-container">
-                <div class="card" onclick="selectMap('BASIC')"><div class="map-preview" style="display:flex; align-items:center; justify-content:center; color:#333; font-size:10px;">[EMPTY]</div><div class="card-title" style="color:white">Basic Arena</div></div>
-                <div class="card" onclick="selectMap('SKYLINE')"><div class="map-preview"><div class="map-wall" style="left:20%; top:60%; width:20%; height:5px;"></div><div class="map-wall" style="left:60%; top:60%; width:20%; height:5px;"></div><div class="map-wall" style="left:40%; top:30%; width:20%; height:5px;"></div></div><div class="card-title" style="color:var(--neon-cyan)">Skyline</div></div>
-                <div class="card" onclick="selectMap('CAGE')"><div class="map-preview"><div class="map-wall" style="left:45%; top:40%; width:10%; height:40%;"></div><div class="map-wall" style="left:10%; top:70%; width:30%; height:5px;"></div><div class="map-wall" style="left:60%; top:70%; width:30%; height:5px;"></div></div><div class="card-title" style="color:var(--neon-red)">The Cage</div></div>
-                <div class="card" onclick="selectMap('STAIRS')"><div class="map-preview"><div class="map-wall" style="left:10%; top:80%; width:15%; height:5px;"></div><div class="map-wall" style="left:30%; top:60%; width:15%; height:5px;"></div><div class="map-wall" style="left:50%; top:40%; width:15%; height:5px;"></div><div class="map-wall" style="left:70%; top:20%; width:15%; height:5px;"></div></div><div class="card-title" style="color:var(--neon-gold)">Stairway</div></div>
-                <div class="card" onclick="selectMap('CUSTOM')"><div class="map-preview" style="border-color:var(--neon-green); display:flex; align-items:center; justify-content:center; color:var(--neon-green); font-size:20px;">?</div><div class="card-title" style="color:var(--neon-green)">Custom</div></div>
+                <div class="card" onclick="selectMap('BASIC')"><div class="map-preview"></div><div class="card-title">BASIC</div></div>
+                <div class="card" onclick="selectMap('SKYLINE')"><div class="map-preview"><div class="map-wall" style="left:20%; top:60%; width:20%; height:5px;"></div><div class="map-wall" style="left:60%; top:60%; width:20%; height:5px;"></div></div><div class="card-title">SKYLINE</div></div>
+                <div class="card" onclick="selectMap('CAGE')"><div class="map-preview"><div class="map-wall" style="left:10%; top:70%; width:30%; height:5px;"></div><div class="map-wall" style="left:60%; top:70%; width:30%; height:5px;"></div></div><div class="card-title">CAGE</div></div>
+                <div class="card" onclick="selectMap('STAIRS')"><div class="map-preview"><div class="map-wall" style="left:10%; top:80%; width:15%; height:5px;"></div><div class="map-wall" style="left:50%; top:40%; width:15%; height:5px;"></div></div><div class="card-title">STAIRS</div></div>
+                <div class="card" onclick="selectMap('CUSTOM')"><div class="map-preview" style="border-color:var(--success); display:flex; justify-content:center; align-items:center;">?</div><div class="card-title" style="color:var(--success)">CUSTOM</div></div>
             </div>
-            <button class="btn btn-red" style="margin-top:20px" onclick="showScreen('menu-screen')">Back</button>
+            <button class="btn btn-red" style="margin-top:20px" onclick="showScreen('menu-screen')">BACK</button>
         </div>
 
         <div id="multi-setup-screen" class="screen">
-            <h2>SELECT PLAYER COUNT</h2>
-            <button class="btn" onclick="setupPlayers(2)">2 Players</button>
-            <button class="btn" onclick="setupPlayers(3)">3 Players</button>
-            <button class="btn" onclick="setupPlayers(4)">4 Players</button>
-            <button class="btn btn-red" onclick="showScreen('map-select-screen')">Back</button>
+            <h2>PLAYERS</h2>
+            <button class="btn" onclick="setupPlayers(2)">2 PLAYERS</button>
+            <button class="btn" onclick="setupPlayers(3)">3 PLAYERS</button>
+            <button class="btn" onclick="setupPlayers(4)">4 PLAYERS</button>
+            <button class="btn btn-red" onclick="showScreen('map-select-screen')">BACK</button>
         </div>
 
         <div id="weapon-screen" class="screen">
-            <h2 id="weapon-title">PLAYER 1: SELECT WEAPON</h2>
-            <div class="card-container">
-                <div class="card" onclick="selectWeapon('AA-12')"><div class="card-title" style="color:var(--neon-red)">AA-12</div><p style="font-size:0.7rem">Shotgun<br>Hold: Charge</p></div>
-                <div class="card" onclick="selectWeapon('M60')"><div class="card-title" style="color:var(--neon-gold)">M60</div><p style="font-size:0.7rem">Machine Gun<br>Hold: Spin Up</p></div>
-                <div class="card" onclick="selectWeapon('SKS')"><div class="card-title" style="color:var(--neon-cyan)">SKS</div><p style="font-size:0.7rem">Rifle<br>Hold: Charge</p></div>
-                <div class="card" onclick="selectWeapon('INFERNO')"><div class="card-title" style="color:var(--neon-blue)">INFERNO</div><p style="font-size:0.7rem">Blue Flame<br>Hold: Range+</p></div>
-                <div class="card" onclick="selectWeapon('BLADE')"><div class="card-title" style="color:var(--neon-green)">Z-BLADE</div><p style="font-size:0.7rem">Melee<br>Hold: Wave</p></div>
-                <div class="card" onclick="selectWeapon('C4')"><div class="card-title" style="color:var(--neon-purple)">C4</div><p style="font-size:0.7rem">Bomb<br>Hold: Throw</p></div>
-            </div>
-            <button class="btn btn-red" style="margin-top: 20px" onclick="showScreen('menu-screen')">Cancel</button>
+            <h2 id="weapon-title">PLAYER 1: ARMORY</h2>
+            <div class="coin-display" id="shop-coins"><div class="coin-icon"></div> <span id="shop-coin-val">0</span></div>
+            
+            <div class="card-container" id="weapon-list">
+                </div>
+            
+            <button class="btn btn-red" style="margin-top: 20px" onclick="showScreen('menu-screen')">CANCEL</button>
         </div>
 
-        <div id="game-screen" class="screen">
-            <h2 id="screen-heading" style="margin: 0 0 10px 0;">SIMULATION ACTIVE</h2>
+        <div id="game-screen" style="display:none; width:100%; height:100%;">
             <div id="game-wrapper">
                 <div class="overlay-ui">
                     <div id="status-text"></div>
-                    <div id="difficulty-display" style="color: var(--neon-gold); font-weight: bold;"></div>
+                    <div id="difficulty-display"></div>
                 </div>
-                <canvas id="editorCanvas" width="1000" height="600"></canvas>
+                <canvas id="editorCanvas"></canvas>
                 <div id="physics-world"></div>
-                <div id="game-over-overlay" style="display:none; position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:50; color:white; justify-content:center; align-items:center; flex-direction:column;">
-                    <h1 id="winner-text" style="color:var(--neon-gold)">WINNER FOUND</h1>
-                    <button class="btn" onclick="stopGame()">Return to Menu</button>
+                <div id="game-over-overlay">
+                    <h1 id="winner-text">WINNER!</h1>
+                    <div id="reward-text"></div>
+                    <button class="btn" onclick="stopGame()">CONTINUE</button>
                 </div>
             </div>
-            <button class="btn btn-red" style="margin-top:15px;" onclick="stopGame()">Exit Match</button>
+            <button class="btn btn-red" style="position:absolute; bottom:20px; right:20px; z-index:30; width:150px; padding:10px;" onclick="stopGame()">QUIT</button>
         </div>
     </div>
 
     <div id="info-modal" class="modal">
         <div class="modal-content">
-            <h3>AI RESTRICTIONS APPLIED</h3>
-            <p><strong>AI Nerfs:</strong></p>
+            <h3>ECONOMY UPDATE</h3>
+            <p><strong>Earn Coins:</strong> Win matches vs AI.</p>
             <ul>
-                <li><strong>Banned Weapons:</strong> M60, Inferno, C4. (Only AA-12, SKS, Blade allowed).</li>
-                <li><strong>Crippled Dash:</strong> AI Dash range is 1/10th of Player's. It's just a tiny hop.</li>
+                <li>Win: +100 Coins</li>
+                <li>Hell Way Win: +300 Coins</li>
+                <li>Loss: +10 Coins</li>
             </ul>
-            <button class="btn" onclick="closeModal('info-modal')">Close</button>
+            <p><strong>Prices:</strong></p>
+            <ul>
+                <li>SKS: FREE</li>
+                <li>AA-12: 200 | M60: 400 | Blade: 600</li>
+                <li>Inferno / C4: 1000</li>
+            </ul>
+            <button class="btn" onclick="closeModal('info-modal')">OK</button>
         </div>
     </div>
 
     <script>
+        // --- DATA & SAVING ---
+        let playerData = {
+            coins: 0,
+            ownedWeapons: ['SKS'] // Default Starter
+        };
+
+        const WEAPON_DB = {
+            'SKS':     { name: 'SKS',     price: 0,    desc: 'Rifle', color: '#3498db' },
+            'AA-12':   { name: 'AA-12',   price: 200,  desc: 'Shotgun', color: '#e74c3c' },
+            'M60':     { name: 'M60',     price: 400,  desc: 'Machine Gun', color: '#f1c40f' },
+            'BLADE':   { name: 'BLADE',   price: 600,  desc: 'Melee', color: '#2ecc71' },
+            'INFERNO': { name: 'INFERNO', price: 1000, desc: 'Fire Trap', color: '#42f5e0' },
+            'C4':      { name: 'C4',      price: 1000, desc: 'Explosive', color: '#9b59b6' }
+        };
+
+        function loadData() {
+            const saved = localStorage.getItem('ares_save_v1');
+            if (saved) {
+                playerData = JSON.parse(saved);
+                // Ensure SKS is always there just in case
+                if(!playerData.ownedWeapons.includes('SKS')) playerData.ownedWeapons.push('SKS');
+            }
+            updateCoinUI();
+        }
+
+        function saveData() {
+            localStorage.setItem('ares_save_v1', JSON.stringify(playerData));
+            updateCoinUI();
+        }
+
+        function updateCoinUI() {
+            document.getElementById('coin-val').innerText = playerData.coins;
+            document.getElementById('shop-coin-val').innerText = playerData.coins;
+        }
+
+        function addCoins(amount) {
+            playerData.coins += amount;
+            saveData();
+        }
+
+        // --- GAME LOGIC ---
         const TILE_SIZE = 40;
-        
         const PRESET_MAPS = {
             'BASIC': [],
             'SKYLINE': [{x: 200, y: 400}, {x: 240, y: 400}, {x: 280, y: 400}, {x: 700, y: 400}, {x: 740, y: 400}, {x: 780, y: 400}, {x: 440, y: 200}, {x: 480, y: 200}, {x: 520, y: 200}],
@@ -140,20 +205,21 @@
         };
 
         const DIFFICULTIES = {
-            'EASY':   { name: 'EASY',   level: 0, aiDelay: 1500, aiChargeSpeed: 0.001, aiCooldownMult: 1.5, aiHp: 80 },
-            'NORMAL': { name: 'NORMAL', level: 1, aiDelay: 900,  aiChargeSpeed: 0.003, aiCooldownMult: 1.0, aiHp: 100 },
-            'HARD':   { name: 'HARD',   level: 2, aiDelay: 400,  aiChargeSpeed: 0.005, aiCooldownMult: 0.8, aiHp: 150 },
-            'HELL':   { name: 'HELL WAY', level: 3, aiDelay: 50, aiChargeSpeed: 0.01,  aiCooldownMult: 0.5, aiHp: 300 }
+            'EASY':   { name: 'EASY',   level: 0, aiDelay: 1500, aiChargeSpeed: 0.005, aiCooldownMult: 1.5, aiHp: 80 },
+            'NORMAL': { name: 'NORMAL', level: 1, aiDelay: 900,  aiChargeSpeed: 0.008, aiCooldownMult: 1.0, aiHp: 100 },
+            'HARD':   { name: 'HARD',   level: 2, aiDelay: 400,  aiChargeSpeed: 0.015, aiCooldownMult: 0.8, aiHp: 150 },
+            'HELL':   { name: 'HELL WAY', level: 3, aiDelay: 50, aiChargeSpeed: 0.03,  aiCooldownMult: 0.5, aiHp: 300 }
         };
 
-        let gameState = { 
-            mode: 'MENU', totalPlayers: 2, selectingPlayer: 1, playerLoadouts: [], mapData: [], selectedMapKey: 'BASIC', currentDiff: DIFFICULTIES['NORMAL']
-        };
+        let gameState = { mode: 'MENU', totalPlayers: 2, selectingPlayer: 1, playerLoadouts: [], mapData: [], selectedMapKey: 'BASIC', currentDiff: DIFFICULTIES['NORMAL'] };
 
-        function showScreen(id) { document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); document.getElementById(id).classList.add('active'); }
+        // INIT
+        loadData();
+
+        function showScreen(id) { document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); document.getElementById(id).classList.add('active'); if(id === 'game-screen') document.getElementById(id).style.display = 'block'; else document.getElementById('game-screen').style.display = 'none'; }
         function openModal(id) { document.getElementById(id).style.display = 'flex'; }
         function closeModal(id) { document.getElementById(id).style.display = 'none'; }
-        function exitGame() { if(confirm("Terminate Session?")) window.close(); }
+        function exitGame() { if(confirm("Quit Game?")) window.close(); }
 
         function goToDifficulty() { showScreen('difficulty-screen'); }
         function selectDifficulty(diffKey) { gameState.currentDiff = DIFFICULTIES[diffKey]; gameState.mode = 'AI'; showMapScreen(); }
@@ -162,41 +228,98 @@
         function setupPlayers(count) { startWeaponSetup(count); }
         
         function startWeaponSetup(count) {
-            gameState.totalPlayers = count; gameState.selectingPlayer = 1; gameState.playerLoadouts = []; updateWeaponTitle(); showScreen('weapon-screen');
+            gameState.totalPlayers = count; gameState.selectingPlayer = 1; gameState.playerLoadouts = []; 
+            updateWeaponTitle(); 
+            renderWeaponShop(); // RENDER SHOP CARDS
+            showScreen('weapon-screen');
         }
+
         function updateWeaponTitle() {
-            const colors = ['#48bb78', '#f56565', '#4299e1', '#ffd700'];
+            const colors = ['#3498db', '#e74c3c', '#2ecc71', '#f1c40f'];
             const title = document.getElementById('weapon-title');
             title.innerText = `PLAYER ${gameState.selectingPlayer}: SELECT WEAPON`;
             title.style.color = colors[gameState.selectingPlayer - 1];
         }
+
+        function renderWeaponShop() {
+            const container = document.getElementById('weapon-list');
+            container.innerHTML = '';
+            
+            // If it's Player 1 (Human) in AI Mode or any player in Multi (We assume shared progression or just allow all for multi? Let's restrict P1 in AI mode).
+            // Actually, usually Multi unlocks everything or Player 1's save. Let's make P1 use save, others free for now or same restrictions.
+            // Simplified: P1 uses Save Data. Other players (Multi) get access to whatever P1 has unlocked OR all (let's say all for fun in Multi).
+            
+            // Strict Mode: Only P1 in Singleplayer checks coins. Multi = Free for all.
+            const checkOwner = (gameState.mode === 'AI' && gameState.selectingPlayer === 1);
+
+            for (const key in WEAPON_DB) {
+                const w = WEAPON_DB[key];
+                const isOwned = !checkOwner || playerData.ownedWeapons.includes(key);
+                const canBuy = checkOwner && !isOwned && playerData.coins >= w.price;
+                
+                let html = `<div class="card ${(!isOwned && !canBuy) ? 'locked' : ''}" onclick="trySelectWeapon('${key}')">`;
+                html += `<div class="card-title" style="color:${w.color}">${w.name}</div>`;
+                html += `<p style="font-size:0.7rem; color:#7f8c8d">${w.desc}</p>`;
+                
+                if (checkOwner) {
+                    if (isOwned) html += `<div class="owned-tag">OWNED</div>`;
+                    else html += `<div class="price-tag">${w.price} 💰</div>`;
+                }
+                
+                html += `</div>`;
+                container.innerHTML += html;
+            }
+        }
+
+        function trySelectWeapon(key) {
+            // Logic for P1 in AI Mode
+            if (gameState.mode === 'AI' && gameState.selectingPlayer === 1) {
+                if (playerData.ownedWeapons.includes(key)) {
+                    // Owned -> Select
+                    selectWeapon(key);
+                } else {
+                    // Not Owned -> Try Buy
+                    const w = WEAPON_DB[key];
+                    if (playerData.coins >= w.price) {
+                        if(confirm(`Buy ${w.name} for ${w.price} Coins?`)) {
+                            playerData.coins -= w.price;
+                            playerData.ownedWeapons.push(key);
+                            saveData();
+                            renderWeaponShop(); // Refresh UI
+                            selectWeapon(key); // Auto select after buy
+                        }
+                    } else {
+                        alert("Not enough coins!");
+                    }
+                }
+            } else {
+                // Multiplayer or AI Bot selection (handled internally) -> Always allow
+                selectWeapon(key);
+            }
+        }
+
         function selectWeapon(weapon) {
             gameState.playerLoadouts.push(weapon);
             if (gameState.mode === 'AI' && gameState.selectingPlayer === 1) {
-                // RESTRICTED AI WEAPONS: Only AA-12, SKS, BLADE
-                const aiWeapons = ['AA-12', 'SKS', 'BLADE']; 
+                const aiWeapons = ['AA-12', 'SKS', 'BLADE']; // RESTRICTED POOL
                 gameState.playerLoadouts.push(aiWeapons[Math.floor(Math.random() * aiWeapons.length)]);
                 initBattle();
                 return;
             }
             if (gameState.selectingPlayer < gameState.totalPlayers) {
                 gameState.selectingPlayer++; updateWeaponTitle();
+                // In Multi, re-render shop if we want to reset view, but here we just keep it
             } else {
                 initBattle();
             }
         }
 
-        function startMapEditor() {
-            gameState.mode = 'EDITOR'; showScreen('game-screen'); document.getElementById('screen-heading').innerText = "MAP CREATOR";
-            document.getElementById('editorCanvas').style.display = 'block'; document.getElementById('physics-world').innerHTML = ''; document.getElementById('game-over-overlay').style.display = 'none'; initEditor();
-        }
-
-        const editorCanvas = document.getElementById('editorCanvas');
-        const editorCtx = editorCanvas.getContext('2d');
-        let isDrawing = false;
-        function initEditor() { gameState.mapData = []; renderEditor(); editorCanvas.onmousedown = (e) => { isDrawing = true; addWall(e); }; editorCanvas.onmousemove = (e) => { if(isDrawing) addWall(e); }; editorCanvas.onmouseup = () => { isDrawing = false; }; }
+        // ... MAP EDITOR & ENGINE SETUP SAME AS BEFORE ...
+        function startMapEditor() { gameState.mode = 'EDITOR'; showScreen('game-screen'); document.getElementById('editorCanvas').style.display = 'block'; document.getElementById('physics-world').innerHTML = ''; document.getElementById('game-over-overlay').style.display = 'none'; initEditor(); }
+        const editorCanvas = document.getElementById('editorCanvas'); const editorCtx = editorCanvas.getContext('2d'); let isDrawing = false;
+        function initEditor() { editorCanvas.width = window.innerWidth; editorCanvas.height = window.innerHeight; gameState.mapData = []; renderEditor(); editorCanvas.onmousedown = (e) => { isDrawing = true; addWall(e); }; editorCanvas.onmousemove = (e) => { if(isDrawing) addWall(e); }; editorCanvas.onmouseup = () => { isDrawing = false; }; }
         function addWall(e) { const rect = editorCanvas.getBoundingClientRect(); const x = Math.floor((e.clientX - rect.left)/TILE_SIZE)*TILE_SIZE; const y = Math.floor((e.clientY - rect.top)/TILE_SIZE)*TILE_SIZE; if (!gameState.mapData.some(w => w.x === x && w.y === y)) { gameState.mapData.push({x, y}); renderEditor(); } }
-        function renderEditor() { editorCtx.clearRect(0,0,1000,600); editorCtx.strokeStyle='#333'; for(let i=0;i<1000;i+=TILE_SIZE)editorCtx.strokeRect(i,0,1,600); for(let j=0;j<600;j+=TILE_SIZE)editorCtx.strokeRect(0,j,1000,1); editorCtx.fillStyle='#555'; editorCtx.strokeStyle='#00f3ff'; gameState.mapData.forEach(w => { editorCtx.fillRect(w.x,w.y,TILE_SIZE,TILE_SIZE); editorCtx.strokeRect(w.x,w.y,TILE_SIZE,TILE_SIZE); }); }
+        function renderEditor() { const w = editorCanvas.width, h = editorCanvas.height; editorCtx.clearRect(0,0,w,h); editorCtx.strokeStyle='#333'; for(let i=0;i<w;i+=TILE_SIZE)editorCtx.strokeRect(i,0,1,h); for(let j=0;j<h;j+=TILE_SIZE)editorCtx.strokeRect(0,j,w,1); editorCtx.fillStyle='#555'; editorCtx.strokeStyle='#00f3ff'; gameState.mapData.forEach(w => { editorCtx.fillRect(w.x,w.y,TILE_SIZE,TILE_SIZE); editorCtx.strokeRect(w.x,w.y,TILE_SIZE,TILE_SIZE); }); }
 
         const Engine = Matter.Engine, Render = Matter.Render, Runner = Matter.Runner, Bodies = Matter.Bodies, Body = Matter.Body, Composite = Matter.Composite, Events = Matter.Events, Vector = Matter.Vector;
         let engine, render, runner, players = [], keys = {};
@@ -204,40 +327,41 @@
         function stopGame() { if(runner) Runner.stop(runner); if(engine) Matter.Engine.clear(engine); if(render) { Render.stop(render); render.canvas.remove(); } document.getElementById('editorCanvas').style.display='none'; showScreen('menu-screen'); }
 
         function initBattle() {
-            showScreen('game-screen');
-            document.getElementById('screen-heading').innerText = "COMBAT SIMULATION";
-            document.getElementById('editorCanvas').style.display = 'none';
-            document.getElementById('game-over-overlay').style.display = 'none';
+            showScreen('game-screen'); document.getElementById('editorCanvas').style.display = 'none'; document.getElementById('game-over-overlay').style.display = 'none';
             
             if(gameState.mode === 'AI') {
-                document.getElementById('difficulty-display').innerText = `DIFFICULTY: ${gameState.currentDiff.name} (AI HP: ${gameState.currentDiff.aiHp})`;
-                document.getElementById('difficulty-display').style.color = (gameState.currentDiff.name === 'HELL WAY') ? '#bc13fe' : 'gold';
-            } else {
-                document.getElementById('difficulty-display').innerText = "";
-            }
+                document.getElementById('difficulty-display').innerText = `DIFFICULTY: ${gameState.currentDiff.name}`;
+            } else { document.getElementById('difficulty-display').innerText = ""; }
 
+            const screenW = window.innerWidth; const screenH = window.innerHeight;
             engine = Engine.create(); engine.gravity.y = 1.2;
             const el = document.getElementById('physics-world'); el.innerHTML = '';
-            render = Render.create({ element: el, engine: engine, options: { width: 1000, height: 600, wireframes: false, background: '#151515' } });
+            render = Render.create({ element: el, engine: engine, options: { width: screenW, height: screenH, wireframes: false, background: '#2c3e50' } });
 
+            const wallColor = '#95a5a6'; const wallThickness = 60;
             const walls = [
-                Bodies.rectangle(500, 610, 1000, 60, { isStatic: true, label: 'Wall' }), 
-                Bodies.rectangle(-30, 300, 60, 600, { isStatic: true, label: 'Wall' }),
-                Bodies.rectangle(1030, 300, 60, 600, { isStatic: true, label: 'Wall' }),
-                Bodies.rectangle(500, -30, 1000, 60, { isStatic: true, label: 'Wall' })
+                Bodies.rectangle(screenW/2, screenH + wallThickness/2 - 10, screenW, wallThickness, { isStatic: true, label: 'Wall', render: { fillStyle: wallColor } }), 
+                Bodies.rectangle(-wallThickness/2, screenH/2, wallThickness, screenH, { isStatic: true, label: 'Wall', render: { fillStyle: wallColor } }), 
+                Bodies.rectangle(screenW + wallThickness/2, screenH/2, wallThickness, screenH, { isStatic: true, label: 'Wall', render: { fillStyle: wallColor } }), 
+                Bodies.rectangle(screenW/2, -wallThickness*2, screenW, wallThickness, { isStatic: true, label: 'Wall', render: { fillStyle: wallColor } }) 
             ];
-            let mapToLoad = (gameState.selectedMapKey === 'CUSTOM') ? gameState.mapData : PRESET_MAPS[gameState.selectedMapKey];
-            mapToLoad.forEach(w => walls.push(Bodies.rectangle(w.x+TILE_SIZE/2, w.y+TILE_SIZE/2, TILE_SIZE, TILE_SIZE, { isStatic: true, label: 'Wall' })));
+
+            let mapToLoad = [];
+            if (gameState.selectedMapKey === 'CUSTOM') { mapToLoad = gameState.mapData; } 
+            else {
+                const offsetX = (screenW - 1000) / 2; const offsetY = (screenH - 600) / 2; const baseMap = PRESET_MAPS[gameState.selectedMapKey];
+                mapToLoad = baseMap.map(tile => ({ x: tile.x + offsetX, y: tile.y + offsetY }));
+            }
+            mapToLoad.forEach(w => walls.push(Bodies.rectangle(w.x+TILE_SIZE/2, w.y+TILE_SIZE/2, TILE_SIZE, TILE_SIZE, { isStatic: true, label: 'Wall', render: { fillStyle: wallColor } })));
             Composite.add(engine.world, walls);
 
-            players = [];
-            const spawnX = [200, 800, 500, 350];
-            const pColors = ['#48bb78', '#f56565', '#4299e1', '#ffd700'];
-            for(let i=0; i<gameState.totalPlayers; i++) players.push(createPlayer(spawnX[i], 300, pColors[i], gameState.playerLoadouts[i], i+1));
+            players = []; const spawnBaseX = [200, 800, 500, 350]; const offsetX = (screenW - 1000) / 2; const pColors = ['#3498db', '#e74c3c', '#2ecc71', '#f1c40f'];
+            for(let i=0; i<gameState.totalPlayers; i++) {
+                let sX = spawnBaseX[i] + offsetX; let sY = (screenH > 600) ? (screenH/2) : 200; 
+                players.push(createPlayer(sX, sY, pColors[i], gameState.playerLoadouts[i], i+1));
+            }
 
-            keys = {};
-            document.onkeydown = e => { keys[e.code] = true; handleJump(e.code); handleDash(e.code); };
-            document.onkeyup = e => { keys[e.code] = false; };
+            keys = {}; document.onkeydown = e => { keys[e.code] = true; handleJump(e.code); handleDash(e.code); }; document.onkeyup = e => { keys[e.code] = false; };
 
             Events.on(engine, 'beforeUpdate', () => {
                 const now = Date.now();
@@ -251,102 +375,38 @@
                     if (p.id === 4) { leftKey='KeyF'; rightKey='KeyH'; shootKey='KeyG'; shieldKey='KeyV'; }
 
                     if (p.isDashing && now < p.dashEndTime) {
-                        // DASH NERF LOGIC
-                        let dashSpeed = 25; // Default Human Speed
-                        if (p.id === 2 && gameState.mode === 'AI') {
-                            dashSpeed = 2.5; // AI Nerf: 1/10th speed
-                        }
-                        
-                        vX = dashSpeed * p.facing; 
-                        Body.setVelocity(p.body, { x: vX, y: 0 }); 
-                        return;
+                        let dashSpeed = 25; if (p.id === 2 && gameState.mode === 'AI') dashSpeed = 2.5; 
+                        vX = dashSpeed * p.facing; Body.setVelocity(p.body, { x: vX, y: 0 }); return;
                     } else { p.isDashing = false; }
 
                     if (p.id === 2 && gameState.mode === 'AI') {
-                        // AI LOGIC
                         const target = players[0];
                         if (target && target.hp > 0) {
-                            const dx = target.body.position.x - p.body.position.x;
-                            const dy = target.body.position.y - p.body.position.y;
-                            const dist = Math.sqrt(dx*dx + dy*dy);
+                            const dx = target.body.position.x - p.body.position.x; const dy = target.body.position.y - p.body.position.y; const dist = Math.sqrt(dx*dx + dy*dy);
                             p.facing = dx > 0 ? 1 : -1;
-                            
-                            let optimalDist = 200;
-                            if (p.weapon === 'INFERNO' || p.weapon === 'BLADE') optimalDist = 60;
-                            
-                            if (dist > optimalDist + 50) vX = speed * p.facing; 
-                            else if (dist < optimalDist - 50) vX = -speed * p.facing;
-                            
+                            let optimalDist = 200; if (p.weapon === 'BLADE') optimalDist = 60;
+                            if (dist > optimalDist + 50) vX = speed * p.facing; else if (dist < optimalDist - 50) vX = -speed * p.facing;
                             if (dy < -60) { if (p.reactionTimer === 0) p.reactionTimer = now + gameState.currentDiff.aiDelay; } else { p.reactionTimer = 0; }
                             if (p.reactionTimer > 0 && now > p.reactionTimer && p.jumpCount < 2) { Body.setVelocity(p.body, { x: p.body.velocity.x, y: -12 }); p.jumpCount++; p.reactionTimer = 0; }
-
-                            if (Math.random() < 0.01 && now - p.lastShieldTime > 10000 && !p.isShielding) {
-                                p.isShielding = true; p.shieldStartTime = now;
-                                setTimeout(() => { p.isShielding = false; p.lastShieldTime = Date.now(); }, 2000); 
-                            }
-                            if (Math.random() < 0.01 && now - p.lastDash > 1500) {
-                                p.isDashing = true; p.dashEndTime = now + 200; p.lastDash = now;
-                            }
-
+                            if (Math.random() < 0.01 && now - p.lastShieldTime > 10000 && !p.isShielding) { p.isShielding = true; p.shieldStartTime = now; setTimeout(() => { p.isShielding = false; p.lastShieldTime = Date.now(); }, 2000); }
+                            if (Math.random() < 0.01 && now - p.lastDash > 1500) { p.isDashing = true; p.dashEndTime = now + 200; p.lastDash = now; }
                             if (Math.abs(dy) < 150 && dist < 400 && !p.isShielding) {
-                                if (p.weapon === 'BLADE') {
-                                    if (dist < 80 && now - p.lastShot > p.stats.rate) swingBlade(p, now);
-                                }
-                                else if (p.weapon === 'INFERNO') { // AI won't have this, but just in case
-                                    if (now - p.lastShot > p.stats.rate) {
-                                        if (p.chargeValue < 1.0) p.chargeValue += 0.02; 
-                                        shootContinuous(p, now);
-                                    }
-                                }
-                                else if (p.weapon === 'M60') { shootContinuous(p, now); }
-                                else { // AA-12, SKS
-                                    if (now - p.lastShot > p.stats.rate) {
-                                        if (!p.isCharging) { p.isCharging = true; p.chargeValue = 0; }
-                                        else {
-                                            p.chargeValue += gameState.currentDiff.aiChargeSpeed;
-                                            if (p.chargeValue > (0.4 + Math.random()*0.6)) { shootCharge(p, p.chargeValue); p.isCharging = false; p.chargeValue = 0; p.lastShot = now; }
-                                        }
-                                    } else { p.isCharging = false; p.chargeValue = 0; }
-                                }
-                            } else {
-                                p.isCharging = false; p.chargeValue = 0;
-                            }
+                                if (p.weapon === 'BLADE') { if (dist < 80 && now - p.lastShot > p.stats.rate) swingBlade(p, now); } 
+                                else { if (now - p.lastShot > p.stats.rate) { if (!p.isCharging) { p.isCharging = true; p.chargeValue = 0; } else { p.chargeValue += gameState.currentDiff.aiChargeSpeed; if (p.chargeValue > (0.4 + Math.random()*0.6)) { shootCharge(p, p.chargeValue); p.isCharging = false; p.chargeValue = 0; p.lastShot = now; } } } }
+                            } else { if (p.isCharging) { shootCharge(p, p.chargeValue); p.isCharging = false; p.chargeValue = 0; p.lastShot = now; } else { p.isCharging = false; p.chargeValue = 0; } }
                         }
-                    } 
-                    // HUMAN CONTROL
-                    else {
+                    } else {
                         if (keys[leftKey]) { vX = -speed; p.facing = -1; }
                         if (keys[rightKey]) { vX = speed; p.facing = 1; }
-
-                        if (keys[shieldKey]) {
-                            if (now - p.lastShieldTime > 10000) {
-                                if (!p.isShielding) { p.isShielding = true; p.shieldStartTime = now; }
-                                if (now - p.shieldStartTime > 5000) { explodeShield(p); p.isShielding = false; p.lastShieldTime = now; }
-                            }
-                        } else {
-                            if (p.isShielding) { p.isShielding = false; p.lastShieldTime = now; }
-                        }
-
+                        if (keys[shieldKey]) { if (now - p.lastShieldTime > 10000) { if (!p.isShielding) { p.isShielding = true; p.shieldStartTime = now; } if (now - p.shieldStartTime > 5000) { explodeShield(p); p.isShielding = false; p.lastShieldTime = now; } } } else { if (p.isShielding) { p.isShielding = false; p.lastShieldTime = now; } }
                         if (!p.isShielding) {
                             if (keys[shootKey]) {
-                                let humanChargeSpeed = 0.003; 
-                                if (gameState.mode === 'AI' && gameState.currentDiff.name === 'HELL WAY') humanChargeSpeed = 0.015; 
-
-                                if (p.weapon === 'C4') {
-                                    if (p.activeC4) { if (!p.isHoldingTrigger) { p.isHoldingTrigger = true; detonateC4(p); } } 
-                                    else { if (!p.isCharging) { p.isCharging = true; p.chargeValue = 0.1; } else if (p.chargeValue < 1.0) { p.chargeValue += humanChargeSpeed; } }
-                                }
-                                else if (p.weapon === 'INFERNO') {
-                                    if (!p.isCharging) { p.isCharging = true; p.chargeValue = 0.1; } else if (p.chargeValue < 1.0) { p.chargeValue += humanChargeSpeed; }
-                                    shootContinuous(p, now);
-                                }
-                                else if (p.weapon === 'BLADE') {
-                                    if (now - p.lastShot > p.stats.rate) { if (!p.isCharging) { p.isCharging = true; p.chargeValue = 0.1; } else if (p.chargeValue < 1.0) { p.chargeValue += humanChargeSpeed; } }
-                                }
+                                let humanChargeSpeed = 0.003; if (gameState.mode === 'AI' && gameState.currentDiff.name === 'HELL WAY') humanChargeSpeed = 0.015; 
+                                if (p.weapon === 'C4') { if (p.activeC4) { if (!p.isHoldingTrigger) { p.isHoldingTrigger = true; detonateC4(p); } } else { if (!p.isCharging) { p.isCharging = true; p.chargeValue = 0.1; } else if (p.chargeValue < 1.0) { p.chargeValue += humanChargeSpeed; } } }
+                                else if (p.weapon === 'INFERNO') { if (!p.isCharging) { p.isCharging = true; p.chargeValue = 0.1; } else if (p.chargeValue < 1.0) { p.chargeValue += humanChargeSpeed; } shootContinuous(p, now); }
+                                else if (p.weapon === 'BLADE') { if (now - p.lastShot > p.stats.rate) { if (!p.isCharging) { p.isCharging = true; p.chargeValue = 0.1; } else if (p.chargeValue < 1.0) { p.chargeValue += humanChargeSpeed; } } }
                                 else if (p.weapon === 'M60') { shootContinuous(p, now); } 
-                                else {
-                                    if (now - p.lastShot > p.stats.rate) { if (!p.isCharging) { p.isCharging = true; p.chargeValue = 0.1; } else if (p.chargeValue < 1.0) { p.chargeValue += humanChargeSpeed; } }
-                                }
+                                else { if (now - p.lastShot > p.stats.rate) { if (!p.isCharging) { p.isCharging = true; p.chargeValue = 0.1; } else if (p.chargeValue < 1.0) { p.chargeValue += humanChargeSpeed; } } }
                             } else {
                                 p.isHoldingTrigger = false;
                                 if (p.weapon === 'INFERNO') { p.chargeValue = 0; }
@@ -361,269 +421,72 @@
                 });
             });
 
-            Events.on(engine, 'collisionStart', (e) => { e.pairs.forEach(p => { 
-                players.forEach(pl => { if ((p.bodyA===pl.body||p.bodyB===pl.body) && (p.bodyA.label==='Wall'||p.bodyB.label==='Wall')) pl.jumpCount=0; }); 
-                checkBulletHit(p.bodyA, p.bodyB); 
-            }); });
+            Events.on(engine, 'collisionStart', (e) => { e.pairs.forEach(p => { players.forEach(pl => { if ((p.bodyA===pl.body||p.bodyB===pl.body) && (p.bodyA.label==='Wall'||p.bodyB.label==='Wall')) pl.jumpCount=0; }); checkBulletHit(p.bodyA, p.bodyB); }); });
             Events.on(render, 'afterRender', () => { const ctx = render.context; ctx.fillStyle='#444'; ctx.strokeStyle='#00f3ff'; walls.forEach(w=>{if(w.label==='Wall'){const{min,max}=w.bounds;ctx.fillRect(min.x,min.y,max.x-min.x,max.y-min.y);ctx.strokeRect(min.x,min.y,max.x-min.x,max.y-min.y);}}); players.forEach(p=>{if(p.hp>0)drawCharacter(ctx,p);}); });
             Render.run(render); runner = Runner.create(); Runner.run(runner, engine);
         }
 
+        // ... MOVEMENT & COMBAT LOGIC SAME AS BEFORE ...
         function handleJump(code) { players.forEach(p => { if (p.hp<=0 || (gameState.mode==='AI'&&p.id===2)) return; let jk=''; if(p.id===1)jk='KeyW'; if(p.id===2)jk='ArrowUp'; if(p.id===3)jk='KeyI'; if(p.id===4)jk='KeyT'; if(code===jk && p.jumpCount<2){ Body.setVelocity(p.body,{x:p.body.velocity.x,y:-12}); p.jumpCount++; } }); }
-
-        function handleDash(code) {
-            const now = Date.now();
-            players.forEach(p => {
-                if (p.hp <= 0 || (gameState.mode==='AI'&&p.id===2)) return; // AI handled in loop
-                let dashKey = ''; if(p.id === 1) dashKey = 'KeyQ'; if(p.id === 2) dashKey = 'ShiftRight';
-                
-                if (code === dashKey) {
-                    if (now - p.lastDash > 1500) { p.isDashing = true; p.dashEndTime = now + 200; p.lastDash = now; }
-                }
-            });
-        }
-
+        function handleDash(code) { const now = Date.now(); players.forEach(p => { if (p.hp<=0 || (gameState.mode==='AI'&&p.id===2)) return; let dashKey = ''; if(p.id === 1) dashKey = 'KeyQ'; if(p.id === 2) dashKey = 'ShiftRight'; if (code === dashKey) { if (now - p.lastDash > 1500) { p.isDashing = true; p.dashEndTime = now + 200; p.lastDash = now; } } }); }
+        
         function createPlayer(x, y, color, weapon, id) {
             const body = Bodies.rectangle(x, y, 30, 60, { inertia: Infinity, frictionAir: 0.05, friction: 0, label: `Player${id}` });
             Composite.add(engine.world, body);
-            
             let wStats = { damage: 10, rate: 500, speed: 15, color: 'white' };
-            if(weapon === 'AA-12') wStats = { damage: 4, rate: 600, speed: 15, color: '#ff003c' }; 
-            if(weapon === 'M60') wStats = { damage: 6, rate: 0, speed: 20, color: '#ffd700' };
-            if(weapon === 'SKS') wStats = { damage: 25, rate: 800, speed: 30, color: '#00f3ff' };
+            if(weapon === 'AA-12') wStats = { damage: 4, rate: 600, speed: 15, color: '#e74c3c' }; 
+            if(weapon === 'M60') wStats = { damage: 6, rate: 0, speed: 20, color: '#f1c40f' };
+            if(weapon === 'SKS') wStats = { damage: 25, rate: 800, speed: 30, color: '#3498db' };
             if(weapon === 'INFERNO') wStats = { damage: 1.5, rate: 50, speed: 8, color: '#42f5e0' };
-            if(weapon === 'BLADE') wStats = { damage: 40, rate: 500, speed: 0, color: '#39ff14' };
-            if(weapon === 'C4') wStats = { damage: 80, rate: 500, speed: 10, color: '#bc13fe' };
-
+            if(weapon === 'BLADE') wStats = { damage: 40, rate: 500, speed: 0, color: '#2ecc71' };
+            if(weapon === 'C4') wStats = { damage: 80, rate: 500, speed: 10, color: '#9b59b6' };
             let diffLevel = (gameState.mode === 'AI') ? gameState.currentDiff.level : 1;
             if (id === 1) { wStats.rate *= 0.6; wStats.damage *= (1 + (diffLevel * 0.04)); }
             if (id === 2 && gameState.mode === 'AI') { wStats.rate *= gameState.currentDiff.aiCooldownMult; wStats.damage = (wStats.damage * 0.8) * (1 + (diffLevel * 0.02)); }
-
-            let currentHp = 100;
-            if (id === 2 && gameState.mode === 'AI') currentHp = gameState.currentDiff.aiHp;
-
-            return { 
-                id, body, color, weapon, stats: wStats, 
-                hp: currentHp, maxHp: currentHp,
-                facing: 1, jumpCount: 0, reactionTimer: 0, isCharging: false, chargeValue: 0, lastShot: 0, spinUpTime: 0,
-                activeC4: null, bladeVisual: 0, isHoldingTrigger: false, lastDash: 0, isDashing: false, dashEndTime: 0,
-                isShielding: false, shieldStartTime: 0, lastShieldTime: 0
-            };
+            let currentHp = 100; if (id === 2 && gameState.mode === 'AI') currentHp = gameState.currentDiff.aiHp;
+            return { id, body, color, weapon, stats: wStats, hp: currentHp, maxHp: currentHp, facing: 1, jumpCount: 0, reactionTimer: 0, isCharging: false, chargeValue: 0, lastShot: 0, spinUpTime: 0, activeC4: null, bladeVisual: 0, isHoldingTrigger: false, lastDash: 0, isDashing: false, dashEndTime: 0, isShielding: false, shieldStartTime: 0, lastShieldTime: 0 };
         }
 
-        function explodeShield(p) {
-            const blastRadius = 250; const damage = 20; p.shieldBurstVisual = 10; 
-            players.forEach(target => {
-                if (target.id !== p.id && target.hp > 0) {
-                    const dist = Vector.magnitude(Vector.sub(p.body.position, target.body.position));
-                    if (dist < blastRadius) {
-                        target.hp -= damage;
-                        const forceDir = Vector.normalise(Vector.sub(target.body.position, p.body.position));
-                        Body.applyForce(target.body, target.body.position, Vector.mult(forceDir, 0.5));
-                        if (target.hp <= 0) checkWin();
-                    }
-                }
-            });
-        }
-
-        function shootCharge(p, power) {
-            const baseSpeed = p.stats.speed * 0.5; const finalSpeed = baseSpeed + (p.stats.speed * power); const arcY = (Math.random() * -2) - (power * 5); 
-            if (p.weapon === 'AA-12') {
-                for (let i = 0; i < 6; i++) { 
-                    const bx = p.body.position.x + (25 * p.facing); const by = p.body.position.y - 5;
-                    const bullet = Bodies.circle(bx, by, 3, { label: 'Bullet', damage: p.stats.damage, ownerId: p.id, frictionAir: 0, collisionFilter: { group: -1 }, render: { fillStyle: p.stats.color } });
-                    const spreadY = ((Math.random() - 0.5) * 8) + arcY; Body.setVelocity(bullet, { x: (finalSpeed + (Math.random()-0.5)*2) * p.facing, y: spreadY });
-                    Composite.add(engine.world, bullet); setTimeout(() => { Composite.remove(engine.world, bullet); }, 1000 + (power * 1000));
-                }
-            } else { 
-                const bx = p.body.position.x + (25 * p.facing); const by = p.body.position.y - 5;
-                const bullet = Bodies.circle(bx, by, 4, { label: 'Bullet', damage: p.stats.damage, ownerId: p.id, frictionAir: 0.005, collisionFilter: { group: -1 }, render: { fillStyle: p.stats.color } });
-                Body.setVelocity(bullet, { x: finalSpeed * p.facing, y: arcY + (Math.random() - 0.5) });
-                Composite.add(engine.world, bullet); setTimeout(() => { Composite.remove(engine.world, bullet); }, 1500 + (power * 1500));
-            }
-        }
-
-        function shootContinuous(p, now) {
-            if (p.weapon === 'M60') {
-                p.spinUpTime = Math.min(p.spinUpTime + 16.6, 5000);
-                const progress = p.spinUpTime / 5000; const currentRate = 300 - (220 * progress);
-                if (now - p.lastShot > currentRate) {
-                    const speed = 15 + (15 * progress); const spreadFactor = 3.0 - (2.5 * progress); const spreadY = (Math.random() - 0.5) * spreadFactor * 2;
-                    const bx = p.body.position.x + (35 * p.facing); const by = p.body.position.y - 2;
-                    const bullet = Bodies.circle(bx, by, 3, { label: 'Bullet', damage: p.stats.damage, ownerId: p.id, frictionAir: 0, collisionFilter: { group: -1 }, render: { fillStyle: (progress > 0.8) ? '#fff' : p.stats.color } });
-                    Body.setVelocity(bullet, { x: speed * p.facing, y: spreadY }); Composite.add(engine.world, bullet); setTimeout(() => { Composite.remove(engine.world, bullet); }, 1500);
-                    p.lastShot = now;
-                }
-            } else if (p.weapon === 'INFERNO') {
-                if (now - p.lastShot > p.stats.rate) {
-                    const currentCharge = p.chargeValue || 0.1; 
-                    const fireSpeed = p.stats.speed + (12 * currentCharge); 
-                    for(let i=0; i<2; i++) {
-                        const bx = p.body.position.x + (30 * p.facing); const by = p.body.position.y;
-                        const part = Bodies.circle(bx, by, 4 + Math.random()*3, { label: 'InfernoFlame', damage: p.stats.damage, ownerId: p.id, frictionAir: 0.05, collisionFilter: { group: -1 }, isSensor: true, render: { fillStyle: '#42f5e0' } });
-                        Body.setVelocity(part, { x: (fireSpeed + Math.random()*2) * p.facing, y: (Math.random()-0.5)*3 });
-                        Composite.add(engine.world, part); 
-                        setTimeout(() => { if(!part.isTrap) Composite.remove(engine.world, part); }, 600 + (currentCharge * 400));
-                    }
-                    p.lastShot = now;
-                }
-            }
-        }
-
-        function swingBlade(p, now) {
-            p.lastShot = now; p.bladeVisual = 10;
-            players.forEach(target => {
-                if (target.id !== p.id && target.hp > 0) {
-                    const dist = Vector.magnitude(Vector.sub(p.body.position, target.body.position));
-                    if (dist < 80) {
-                        const dx = target.body.position.x - p.body.position.x;
-                        if ((p.facing === 1 && dx > 0) || (p.facing === -1 && dx < 0)) {
-                            target.hp -= p.stats.damage;
-                            Body.applyForce(target.body, target.body.position, { x: 0.2 * p.facing, y: -0.1 });
-                            if (target.hp <= 0) checkWin();
-                        }
-                    }
-                }
-            });
-        }
-
-        function shootBladeWave(p, power) {
-            const bx = p.body.position.x + (40 * p.facing); const by = p.body.position.y;
-            const isMaxCharge = (power >= 0.95);
-            const wave = Bodies.rectangle(bx, by, 10, 40, { label: 'BladeWave', damage: p.stats.damage * (1 + power), ownerId: p.id, isSensor: true, isWallPass: isMaxCharge, frictionAir: 0, render: { fillStyle: '#39ff14' } });
-            Body.setVelocity(wave, { x: 25 * p.facing, y: 0 }); Composite.add(engine.world, wave); setTimeout(() => { Composite.remove(engine.world, wave); }, 1000);
-        }
-
-        function throwC4(p, now, power) {
-            if (now - p.lastShot < p.stats.rate) return;
-            p.lastShot = now;
-            const finalSpeed = 10 + (10 * power); 
-            const bx = p.body.position.x + (20 * p.facing); const by = p.body.position.y - 10;
-            const bomb = Bodies.rectangle(bx, by, 10, 5, { label: 'C4', ownerId: p.id, friction: 1, restitution: 0, render: { fillStyle: p.stats.color } });
-            bomb.chargeLevel = power; 
-            Body.setVelocity(bomb, { x: finalSpeed * p.facing, y: -5 - (power * 5) });
-            Composite.add(engine.world, bomb); p.activeC4 = bomb;
-        }
-
-        function detonateC4(p) {
-            if (!p.activeC4) return;
-            const bPos = p.activeC4.position;
-            const power = p.activeC4.chargeLevel || 0.1;
-            const blastRadius = 100 + (150 * power);
-            const maxDamage = p.stats.damage * (1 + power); 
-            players.forEach(target => {
-                if (target.hp > 0) {
-                    const dist = Vector.magnitude(Vector.sub(bPos, target.body.position));
-                    if (dist < blastRadius) {
-                        const dmg = maxDamage * (1 - (dist/blastRadius)); target.hp -= dmg;
-                        const forceDir = Vector.normalise(Vector.sub(target.body.position, bPos));
-                        Body.applyForce(target.body, target.body.position, Vector.mult(forceDir, 0.3 + (power * 0.3)));
-                        if (target.hp <= 0) checkWin();
-                    }
-                }
-            });
-            Composite.remove(engine.world, p.activeC4); p.activeC4 = null;
-        }
-
-        function checkBulletHit(bA, bB) {
-            let bullet, target; 
-            if (['Bullet', 'InfernoFlame', 'BladeWave', 'C4'].includes(bA.label)) { bullet = bA; target = bB; }
-            else if (['Bullet', 'InfernoFlame', 'BladeWave', 'C4'].includes(bB.label)) { bullet = bB; target = bA; }
-            
-            if (bullet) {
-                // INFERNO TRAP
-                if (bullet.label === 'InfernoFlame' && target.label === 'Wall') {
-                    if (!bullet.isTrap) { bullet.isTrap = true; Body.setStatic(bullet, true); setTimeout(() => { Composite.remove(engine.world, bullet); }, 3000); }
-                    return;
-                }
-
-                // --- SHIELD LOGIC START ---
-                if (target.label.startsWith('Player')) {
-                    const id = parseInt(target.label.replace('Player', ''));
-                    // Check if victim owns the bullet (e.g. self fire immunity)
-                    if (id !== bullet.ownerId) {
-                        const victim = players.find(p => p.id === id);
-                        if (victim) {
-                            // IF SHIELDING: Block Bullet & BladeWave
-                            if (victim.isShielding) {
-                                let blocked = true;
-                                if (bullet.label === 'InfernoFlame' && bullet.isTrap) blocked = false; // Trap goes under shield
-                                if (bullet.label === 'C4' && bullet.chargeLevel >= 0.95) blocked = false;
-                                
-                                if (blocked) {
-                                    if(bullet.label !== 'C4') Composite.remove(engine.world, bullet);
-                                    return; // BLOCKED!
-                                }
-                            }
-
-                            victim.hp -= bullet.damage; 
-                            if (victim.hp <= 0) checkWin(); 
-                            if (!bullet.isTrap && bullet.label !== 'BladeWave') Composite.remove(engine.world, bullet);
-                        }
-                    }
-                }
-                // --- SHIELD LOGIC END ---
-
-                else if (target.label === 'Wall' && !bullet.isTrap && bullet.label !== 'C4' && !bullet.isWallPass) {
-                    Composite.remove(engine.world, bullet);
-                }
-            }
-        }
-
+        // COIN REWARD LOGIC
         function checkWin() {
             const survivors = players.filter(p => p.hp > 0);
-            if (survivors.length === 1) { document.getElementById('game-over-overlay').style.display = 'flex'; document.getElementById('winner-text').innerText = `PLAYER ${survivors[0].id} WINS!`; Runner.stop(runner); }
+            if (survivors.length === 1) {
+                const winner = survivors[0];
+                let reward = 0;
+                let msg = "";
+                
+                if (winner.id === 1 && gameState.mode === 'AI') {
+                    // Player 1 Won vs AI
+                    if (gameState.currentDiff.name === 'HELL WAY') reward = 300;
+                    else reward = 100;
+                    msg = `YOU WON! +${reward} COINS`;
+                } else if (winner.id === 2 && gameState.mode === 'AI') {
+                    // AI Won
+                    reward = 10;
+                    msg = `DEFEAT! +${reward} COINS`;
+                } else {
+                    msg = `PLAYER ${winner.id} WINS!`;
+                }
+
+                if (reward > 0) addCoins(reward);
+
+                document.getElementById('game-over-overlay').style.display = 'flex';
+                document.getElementById('winner-text').innerText = `PLAYER ${winner.id} WINS!`;
+                document.getElementById('reward-text').innerText = msg;
+                Runner.stop(runner);
+            }
         }
 
-        function drawCharacter(ctx, p) {
-            const { x, y } = p.body.position;
-            const now = Date.now();
-
-            if (p.isShielding) {
-                ctx.strokeStyle = `rgba(0, 243, 255, ${0.5 + (now - p.shieldStartTime)/10000})`; ctx.lineWidth = 4;
-                ctx.beginPath(); ctx.arc(x, y, 40, 0, Math.PI*2); ctx.stroke();
-                if (now - p.shieldStartTime > 4000) { ctx.fillStyle = ((Math.floor(now/100)%2)===0) ? 'white' : 'red'; ctx.beginPath(); ctx.arc(x, y, 10, 0, Math.PI*2); ctx.fill(); }
-            }
-            if (p.shieldBurstVisual > 0) {
-                ctx.strokeStyle = 'white'; ctx.lineWidth = 10; ctx.beginPath(); ctx.arc(x, y, 200, 0, Math.PI*2); ctx.stroke(); p.shieldBurstVisual--;
-            }
-
-            ctx.fillStyle = 'red'; ctx.fillRect(x-20, y-50, 40, 5);
-            ctx.fillStyle = '#0f0'; ctx.fillRect(x-20, y-50, 40 * Math.max(0, p.hp / p.maxHp), 5);
-            
-            if (now - p.lastDash < 1500) { ctx.fillStyle = '#00f3ff'; ctx.fillRect(x-20, y-42, 40 * ((now - p.lastDash)/1500), 3); } 
-            else { ctx.fillStyle = '#00f3ff'; ctx.fillRect(x-20, y-42, 40, 3); }
-
-            if (now - p.lastShieldTime < 10000) { ctx.fillStyle = '#bc13fe'; ctx.fillRect(x-20, y-34, 40 * ((now - p.lastShieldTime)/10000), 3); } 
-            else { ctx.fillStyle = '#bc13fe'; ctx.fillRect(x-20, y-34, 40, 3); }
-
-            if (p.weapon === 'M60' && p.spinUpTime > 0) {
-                ctx.fillStyle = '#444'; ctx.fillRect(x-20, y-60, 40, 4); ctx.fillStyle = '#ff4500'; ctx.fillRect(x-20, y-60, 40 * (p.spinUpTime/5000), 4);
-            } else if ((p.weapon === 'AA-12' || p.weapon === 'SKS' || p.weapon === 'C4' || p.weapon === 'INFERNO' || p.weapon === 'BLADE') && p.isCharging) {
-                ctx.fillStyle = '#444'; ctx.fillRect(x-20, y-60, 40, 4); ctx.fillStyle = 'yellow'; ctx.fillRect(x-20, y-60, 40 * p.chargeValue, 4);
-            } else if (p.weapon === 'C4' && p.activeC4) {
-                ctx.fillStyle = '#bc13fe'; ctx.font = "10px Arial"; ctx.fillText("ACTIVE", x-15, y-60);
-            }
-
-            if (p.bladeVisual > 0) {
-                ctx.strokeStyle = p.stats.color; ctx.lineWidth = 3; ctx.beginPath();
-                ctx.arc(x, y, 50, (p.facing===1?-0.5:2.5), (p.facing===1?0.5:3.5)); ctx.stroke();
-                p.bladeVisual--;
-            }
-
-            ctx.translate(x, y);
-            ctx.fillStyle = '#222'; ctx.fillRect(-10, 15, 8, 15); ctx.fillRect(2, 15, 8, 15);
-            ctx.fillStyle = p.color; ctx.fillRect(-15, -15, 30, 30);
-            ctx.beginPath(); ctx.arc(0, -25, 12, 0, Math.PI*2); ctx.fill();
-            ctx.fillStyle = 'white'; ctx.beginPath(); ctx.arc(5*p.facing, -27, 3, 0, Math.PI*2); ctx.fill();
-            
-            ctx.fillStyle = p.stats.color;
-            if(p.weapon === 'BLADE') { ctx.beginPath(); ctx.moveTo(5*p.facing, 0); ctx.lineTo(35*p.facing, 0); ctx.lineWidth = 4; ctx.strokeStyle = (p.isCharging ? 'white' : '#39ff14'); ctx.stroke(); }
-            else if (p.weapon === 'INFERNO') { ctx.fillRect(10*p.facing, -2, 20*p.facing, 12); }
-            else { ctx.fillRect(10*p.facing, -5, 25*p.facing, 8); }
-            ctx.fillStyle = p.color; ctx.beginPath(); ctx.arc(5*p.facing, 0, 5, 0, Math.PI*2); ctx.fill();
-            ctx.translate(-x, -y);
-        }
+        // ... REMAINING FUNCTIONS (Shoot, Hit, Draw) SAME AS BEFORE ...
+        function explodeShield(p) { const blastRadius = 250; const damage = 20; p.shieldBurstVisual = 10; players.forEach(target => { if (target.id !== p.id && target.hp > 0) { const dist = Vector.magnitude(Vector.sub(p.body.position, target.body.position)); if (dist < blastRadius) { target.hp -= damage; const forceDir = Vector.normalise(Vector.sub(target.body.position, p.body.position)); Body.applyForce(target.body, target.body.position, Vector.mult(forceDir, 0.5)); if (target.hp <= 0) checkWin(); } } }); }
+        function shootCharge(p, power) { const baseSpeed = p.stats.speed * 0.5; const finalSpeed = baseSpeed + (p.stats.speed * power); const arcY = (Math.random() * -2) - (power * 5); if (p.weapon === 'AA-12') { for (let i = 0; i < 6; i++) { const bx = p.body.position.x + (25 * p.facing); const by = p.body.position.y - 5; const bullet = Bodies.circle(bx, by, 3, { label: 'Bullet', damage: p.stats.damage, ownerId: p.id, frictionAir: 0, collisionFilter: { group: -1 }, render: { fillStyle: p.stats.color } }); const spreadY = ((Math.random() - 0.5) * 8) + arcY; Body.setVelocity(bullet, { x: (finalSpeed + (Math.random()-0.5)*2) * p.facing, y: spreadY }); Composite.add(engine.world, bullet); setTimeout(() => { Composite.remove(engine.world, bullet); }, 1000 + (power * 1000)); } } else { const bx = p.body.position.x + (25 * p.facing); const by = p.body.position.y - 5; const bullet = Bodies.circle(bx, by, 4, { label: 'Bullet', damage: p.stats.damage, ownerId: p.id, frictionAir: 0.005, collisionFilter: { group: -1 }, render: { fillStyle: p.stats.color } }); Body.setVelocity(bullet, { x: finalSpeed * p.facing, y: arcY + (Math.random() - 0.5) }); Composite.add(engine.world, bullet); setTimeout(() => { Composite.remove(engine.world, bullet); }, 1500 + (power * 1500)); } }
+        function shootContinuous(p, now) { if (p.weapon === 'M60') { p.spinUpTime = Math.min(p.spinUpTime + 16.6, 5000); const progress = p.spinUpTime / 5000; const currentRate = 300 - (220 * progress); if (now - p.lastShot > currentRate) { const speed = 15 + (15 * progress); const spreadFactor = 3.0 - (2.5 * progress); const spreadY = (Math.random() - 0.5) * spreadFactor * 2; const bx = p.body.position.x + (35 * p.facing); const by = p.body.position.y - 2; const bullet = Bodies.circle(bx, by, 3, { label: 'Bullet', damage: p.stats.damage, ownerId: p.id, frictionAir: 0, collisionFilter: { group: -1 }, render: { fillStyle: (progress > 0.8) ? '#fff' : p.stats.color } }); Body.setVelocity(bullet, { x: speed * p.facing, y: spreadY }); Composite.add(engine.world, bullet); setTimeout(() => { Composite.remove(engine.world, bullet); }, 1500); p.lastShot = now; } } else if (p.weapon === 'INFERNO') { if (now - p.lastShot > p.stats.rate) { const currentCharge = p.chargeValue || 0.1; const fireSpeed = p.stats.speed + (12 * currentCharge); for(let i=0; i<2; i++) { const bx = p.body.position.x + (30 * p.facing); const by = p.body.position.y; const part = Bodies.circle(bx, by, 4 + Math.random()*3, { label: 'InfernoFlame', damage: p.stats.damage, ownerId: p.id, frictionAir: 0.05, collisionFilter: { group: -1 }, isSensor: true, render: { fillStyle: '#42f5e0' } }); Body.setVelocity(part, { x: (fireSpeed + Math.random()*2) * p.facing, y: (Math.random()-0.5)*3 }); Composite.add(engine.world, part); setTimeout(() => { if(!part.isTrap) Composite.remove(engine.world, part); }, 600 + (currentCharge * 400)); } p.lastShot = now; } } }
+        function swingBlade(p, now) { p.lastShot = now; p.bladeVisual = 10; players.forEach(target => { if (target.id !== p.id && target.hp > 0) { const dist = Vector.magnitude(Vector.sub(p.body.position, target.body.position)); if (dist < 80) { const dx = target.body.position.x - p.body.position.x; if ((p.facing === 1 && dx > 0) || (p.facing === -1 && dx < 0)) { target.hp -= p.stats.damage; Body.applyForce(target.body, target.body.position, { x: 0.2 * p.facing, y: -0.1 }); if (target.hp <= 0) checkWin(); } } } }); }
+        function shootBladeWave(p, power) { const bx = p.body.position.x + (40 * p.facing); const by = p.body.position.y; const isMaxCharge = (power >= 0.95); const wave = Bodies.rectangle(bx, by, 10, 40, { label: 'BladeWave', damage: p.stats.damage * (1 + power), ownerId: p.id, isSensor: true, isWallPass: isMaxCharge, frictionAir: 0, render: { fillStyle: '#2ecc71' } }); Body.setVelocity(wave, { x: 25 * p.facing, y: 0 }); Composite.add(engine.world, wave); setTimeout(() => { Composite.remove(engine.world, wave); }, 1000); }
+        function throwC4(p, now, power) { if (now - p.lastShot < p.stats.rate) return; p.lastShot = now; const finalSpeed = 10 + (10 * power); const bx = p.body.position.x + (20 * p.facing); const by = p.body.position.y - 10; const bomb = Bodies.rectangle(bx, by, 10, 5, { label: 'C4', ownerId: p.id, friction: 1, restitution: 0, render: { fillStyle: p.stats.color } }); bomb.chargeLevel = power; Body.setVelocity(bomb, { x: finalSpeed * p.facing, y: -5 - (power * 5) }); Composite.add(engine.world, bomb); p.activeC4 = bomb; }
+        function detonateC4(p) { if (!p.activeC4) return; const bPos = p.activeC4.position; const power = p.activeC4.chargeLevel || 0.1; const blastRadius = 100 + (150 * power); const maxDamage = p.stats.damage * (1 + power); players.forEach(target => { if (target.hp > 0) { const dist = Vector.magnitude(Vector.sub(bPos, target.body.position)); if (dist < blastRadius) { const dmg = maxDamage * (1 - (dist/blastRadius)); target.hp -= dmg; const forceDir = Vector.normalise(Vector.sub(target.body.position, bPos)); Body.applyForce(target.body, target.body.position, Vector.mult(forceDir, 0.3 + (power * 0.3))); if (target.hp <= 0) checkWin(); } } }); Composite.remove(engine.world, p.activeC4); p.activeC4 = null; }
+        function checkBulletHit(bA, bB) { let bullet, target; if (['Bullet', 'InfernoFlame', 'BladeWave', 'C4'].includes(bA.label)) { bullet = bA; target = bB; } else if (['Bullet', 'InfernoFlame', 'BladeWave', 'C4'].includes(bB.label)) { bullet = bB; target = bA; } if (bullet) { if (bullet.label === 'InfernoFlame' && target.label === 'Wall') { if (!bullet.isTrap) { bullet.isTrap = true; Body.setStatic(bullet, true); setTimeout(() => { Composite.remove(engine.world, bullet); }, 3000); } return; } if (target.label.startsWith('Player')) { const id = parseInt(target.label.replace('Player', '')); if (id !== bullet.ownerId) { const victim = players.find(p => p.id === id); if (victim) { if (victim.isShielding) { let blocked = true; if (bullet.label === 'InfernoFlame' && bullet.isTrap) blocked = false; if (bullet.label === 'C4' && bullet.chargeLevel >= 0.95) blocked = false; if (blocked) { if(bullet.label !== 'C4') Composite.remove(engine.world, bullet); return; } } victim.hp -= bullet.damage; if (victim.hp <= 0) checkWin(); if (!bullet.isTrap && bullet.label !== 'BladeWave') Composite.remove(engine.world, bullet); } } } else if (target.label === 'Wall' && !bullet.isTrap && bullet.label !== 'C4' && !bullet.isWallPass) { Composite.remove(engine.world, bullet); } } }
+        function drawCharacter(ctx, p) { const { x, y } = p.body.position; const now = Date.now(); if (p.isShielding) { ctx.strokeStyle = `rgba(52, 152, 219, ${0.5 + (now - p.shieldStartTime)/10000})`; ctx.lineWidth = 4; ctx.beginPath(); ctx.arc(x, y, 40, 0, Math.PI*2); ctx.stroke(); if (now - p.shieldStartTime > 4000) { ctx.fillStyle = ((Math.floor(now/100)%2)===0) ? 'white' : '#e74c3c'; ctx.beginPath(); ctx.arc(x, y, 10, 0, Math.PI*2); ctx.fill(); } } if (p.shieldBurstVisual > 0) { ctx.strokeStyle = 'white'; ctx.lineWidth = 10; ctx.beginPath(); ctx.arc(x, y, 200, 0, Math.PI*2); ctx.stroke(); p.shieldBurstVisual--; } ctx.fillStyle = '#c0392b'; ctx.fillRect(x-20, y-50, 40, 5); ctx.fillStyle = '#2ecc71'; ctx.fillRect(x-20, y-50, 40 * Math.max(0, p.hp / p.maxHp), 5); if (now - p.lastDash < 1500) { ctx.fillStyle = '#3498db'; ctx.fillRect(x-20, y-42, 40 * ((now - p.lastDash)/1500), 3); } else { ctx.fillStyle = '#3498db'; ctx.fillRect(x-20, y-42, 40, 3); } if (now - p.lastShieldTime < 10000) { ctx.fillStyle = '#9b59b6'; ctx.fillRect(x-20, y-34, 40 * ((now - p.lastShieldTime)/10000), 3); } else { ctx.fillStyle = '#9b59b6'; ctx.fillRect(x-20, y-34, 40, 3); } if (p.weapon === 'M60' && p.spinUpTime > 0) { ctx.fillStyle = '#7f8c8d'; ctx.fillRect(x-20, y-60, 40, 4); ctx.fillStyle = '#e67e22'; ctx.fillRect(x-20, y-60, 40 * (p.spinUpTime/5000), 4); } else if ((p.weapon === 'AA-12' || p.weapon === 'SKS' || p.weapon === 'C4' || p.weapon === 'INFERNO' || p.weapon === 'BLADE') && p.isCharging) { ctx.fillStyle = '#7f8c8d'; ctx.fillRect(x-20, y-60, 40, 4); ctx.fillStyle = '#f1c40f'; ctx.fillRect(x-20, y-60, 40 * p.chargeValue, 4); } else if (p.weapon === 'C4' && p.activeC4) { ctx.fillStyle = '#8e44ad'; ctx.font = "10px Arial Black"; ctx.fillText("ACTIVE", x-15, y-60); } if (p.bladeVisual > 0) { ctx.strokeStyle = p.stats.color; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(x, y, 50, (p.facing===1?-0.5:2.5), (p.facing===1?0.5:3.5)); ctx.stroke(); p.bladeVisual--; } ctx.translate(x, y); ctx.fillStyle = p.color; ctx.fillRect(-10, -20, 20, 40); ctx.beginPath(); ctx.arc(0, -30, 12, 0, Math.PI*2); ctx.fill(); const isMoving = Math.abs(p.body.velocity.x) > 0.5; const step = isMoving ? Math.sin(Date.now()/100)*10 : 0; ctx.lineWidth = 5; ctx.strokeStyle = p.color; ctx.beginPath(); ctx.moveTo(-5, 20); ctx.lineTo(-10+step, 35); ctx.stroke(); ctx.beginPath(); ctx.moveTo(5, 20); ctx.lineTo(10-step, 35); ctx.stroke(); ctx.fillStyle = p.stats.color; if(p.weapon === 'BLADE') { ctx.beginPath(); ctx.moveTo(10*p.facing, 0); ctx.lineTo(40*p.facing, 0); ctx.lineWidth = 4; ctx.strokeStyle = (p.isCharging ? 'white' : '#2ecc71'); ctx.stroke(); } else if (p.weapon === 'INFERNO') { ctx.fillRect(10*p.facing, -2, 20*p.facing, 12); } else { ctx.fillRect(10*p.facing, -5, 25*p.facing, 8); } ctx.translate(-x, -y); }
     </script>
 </body>
 </html>
