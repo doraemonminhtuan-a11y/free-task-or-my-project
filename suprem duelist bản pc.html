@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ARES: SHOP UPDATE</title>
+    <title>ARES: WARGOD UPDATE</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
-    
+   
     <style>
-        /* SUPREME STYLE + SHOP UI */
+        /* SUPREME STYLE + SHOP UI (GIỮ NGUYÊN CSS GỐC) */
         :root {
             --primary: #3498db; --danger: #e74c3c; --warning: #f1c40f; --success: #2ecc71;
             --dark: #2c3e50; --panel: #34495e; --text: #ecf0f1; --purple: #9b59b6;
@@ -149,6 +149,7 @@
                 <li>SKS: FREE</li>
                 <li>AA-12: 200 | M60: 400 | Blade: 600</li>
                 <li>Inferno / C4: 1000</li>
+                <li>LASER BEAM: 1500 (NEW!)</li>
             </ul>
             <button class="btn" onclick="closeModal('info-modal')">OK</button>
         </div>
@@ -167,14 +168,14 @@
             'M60':     { name: 'M60',     price: 400,  desc: 'Machine Gun', color: '#f1c40f' },
             'BLADE':   { name: 'BLADE',   price: 600,  desc: 'Melee', color: '#2ecc71' },
             'INFERNO': { name: 'INFERNO', price: 1000, desc: 'Fire Trap', color: '#42f5e0' },
-            'C4':      { name: 'C4',      price: 1000, desc: 'Explosive', color: '#9b59b6' }
+            'C4':      { name: 'C4',      price: 1000, desc: 'Explosive', color: '#9b59b6' },
+            'LASER':   { name: 'LASER',   price: 1500, desc: 'Death Beam', color: '#ff00ff' } // --- TÍNH NĂNG MỚI: LASER ---
         };
 
         function loadData() {
             const saved = localStorage.getItem('ares_save_v1');
             if (saved) {
                 playerData = JSON.parse(saved);
-                // Ensure SKS is always there just in case
                 if(!playerData.ownedWeapons.includes('SKS')) playerData.ownedWeapons.push('SKS');
             }
             updateCoinUI();
@@ -230,7 +231,7 @@
         function startWeaponSetup(count) {
             gameState.totalPlayers = count; gameState.selectingPlayer = 1; gameState.playerLoadouts = []; 
             updateWeaponTitle(); 
-            renderWeaponShop(); // RENDER SHOP CARDS
+            renderWeaponShop(); 
             showScreen('weapon-screen');
         }
 
@@ -245,11 +246,6 @@
             const container = document.getElementById('weapon-list');
             container.innerHTML = '';
             
-            // If it's Player 1 (Human) in AI Mode or any player in Multi (We assume shared progression or just allow all for multi? Let's restrict P1 in AI mode).
-            // Actually, usually Multi unlocks everything or Player 1's save. Let's make P1 use save, others free for now or same restrictions.
-            // Simplified: P1 uses Save Data. Other players (Multi) get access to whatever P1 has unlocked OR all (let's say all for fun in Multi).
-            
-            // Strict Mode: Only P1 in Singleplayer checks coins. Multi = Free for all.
             const checkOwner = (gameState.mode === 'AI' && gameState.selectingPlayer === 1);
 
             for (const key in WEAPON_DB) {
@@ -272,28 +268,24 @@
         }
 
         function trySelectWeapon(key) {
-            // Logic for P1 in AI Mode
             if (gameState.mode === 'AI' && gameState.selectingPlayer === 1) {
                 if (playerData.ownedWeapons.includes(key)) {
-                    // Owned -> Select
                     selectWeapon(key);
                 } else {
-                    // Not Owned -> Try Buy
                     const w = WEAPON_DB[key];
                     if (playerData.coins >= w.price) {
                         if(confirm(`Buy ${w.name} for ${w.price} Coins?`)) {
                             playerData.coins -= w.price;
                             playerData.ownedWeapons.push(key);
                             saveData();
-                            renderWeaponShop(); // Refresh UI
-                            selectWeapon(key); // Auto select after buy
+                            renderWeaponShop();
+                            selectWeapon(key);
                         }
                     } else {
                         alert("Not enough coins!");
                     }
                 }
             } else {
-                // Multiplayer or AI Bot selection (handled internally) -> Always allow
                 selectWeapon(key);
             }
         }
@@ -301,20 +293,19 @@
         function selectWeapon(weapon) {
             gameState.playerLoadouts.push(weapon);
             if (gameState.mode === 'AI' && gameState.selectingPlayer === 1) {
-                const aiWeapons = ['AA-12', 'SKS', 'BLADE']; // RESTRICTED POOL
+                const aiWeapons = ['AA-12', 'SKS', 'BLADE', 'LASER']; // AI CŨNG CÓ THỂ DÙNG LASER
                 gameState.playerLoadouts.push(aiWeapons[Math.floor(Math.random() * aiWeapons.length)]);
                 initBattle();
                 return;
             }
             if (gameState.selectingPlayer < gameState.totalPlayers) {
                 gameState.selectingPlayer++; updateWeaponTitle();
-                // In Multi, re-render shop if we want to reset view, but here we just keep it
             } else {
                 initBattle();
             }
         }
 
-        // ... MAP EDITOR & ENGINE SETUP SAME AS BEFORE ...
+        // ... MAP EDITOR & ENGINE SETUP ...
         function startMapEditor() { gameState.mode = 'EDITOR'; showScreen('game-screen'); document.getElementById('editorCanvas').style.display = 'block'; document.getElementById('physics-world').innerHTML = ''; document.getElementById('game-over-overlay').style.display = 'none'; initEditor(); }
         const editorCanvas = document.getElementById('editorCanvas'); const editorCtx = editorCanvas.getContext('2d'); let isDrawing = false;
         function initEditor() { editorCanvas.width = window.innerWidth; editorCanvas.height = window.innerHeight; gameState.mapData = []; renderEditor(); editorCanvas.onmousedown = (e) => { isDrawing = true; addWall(e); }; editorCanvas.onmousemove = (e) => { if(isDrawing) addWall(e); }; editorCanvas.onmouseup = () => { isDrawing = false; }; }
@@ -380,36 +371,52 @@
                     } else { p.isDashing = false; }
 
                     if (p.id === 2 && gameState.mode === 'AI') {
+                        // AI LOGIC
                         const target = players[0];
                         if (target && target.hp > 0) {
                             const dx = target.body.position.x - p.body.position.x; const dy = target.body.position.y - p.body.position.y; const dist = Math.sqrt(dx*dx + dy*dy);
                             p.facing = dx > 0 ? 1 : -1;
                             let optimalDist = 200; if (p.weapon === 'BLADE') optimalDist = 60;
-                            if (dist > optimalDist + 50) vX = speed * p.facing; else if (dist < optimalDist - 50) vX = -speed * p.facing;
+                            
+                            // ANIMATION STEP CHO AI
+                            if (dist > optimalDist + 50) { vX = speed * p.facing; p.stepAnim++; } 
+                            else if (dist < optimalDist - 50) { vX = -speed * p.facing; p.stepAnim++; }
+                            
                             if (dy < -60) { if (p.reactionTimer === 0) p.reactionTimer = now + gameState.currentDiff.aiDelay; } else { p.reactionTimer = 0; }
                             if (p.reactionTimer > 0 && now > p.reactionTimer && p.jumpCount < 2) { Body.setVelocity(p.body, { x: p.body.velocity.x, y: -12 }); p.jumpCount++; p.reactionTimer = 0; }
                             if (Math.random() < 0.01 && now - p.lastShieldTime > 10000 && !p.isShielding) { p.isShielding = true; p.shieldStartTime = now; setTimeout(() => { p.isShielding = false; p.lastShieldTime = Date.now(); }, 2000); }
                             if (Math.random() < 0.01 && now - p.lastDash > 1500) { p.isDashing = true; p.dashEndTime = now + 200; p.lastDash = now; }
-                            if (Math.abs(dy) < 150 && dist < 400 && !p.isShielding) {
-                                if (p.weapon === 'BLADE') { if (dist < 80 && now - p.lastShot > p.stats.rate) swingBlade(p, now); } 
-                                else { if (now - p.lastShot > p.stats.rate) { if (!p.isCharging) { p.isCharging = true; p.chargeValue = 0; } else { p.chargeValue += gameState.currentDiff.aiChargeSpeed; if (p.chargeValue > (0.4 + Math.random()*0.6)) { shootCharge(p, p.chargeValue); p.isCharging = false; p.chargeValue = 0; p.lastShot = now; } } } }
+                            
+                            if (Math.abs(dy) < 150 && dist < 500 && !p.isShielding) {
+                                // AI SHOOTING LOGIC UPDATE FOR LASER
+                                if (p.weapon === 'LASER' || p.weapon === 'M60' || p.weapon === 'INFERNO') {
+                                     shootContinuous(p, now); 
+                                } else if (p.weapon === 'BLADE') { 
+                                     if (dist < 80 && now - p.lastShot > p.stats.rate) swingBlade(p, now); 
+                                } else { 
+                                    if (now - p.lastShot > p.stats.rate) { if (!p.isCharging) { p.isCharging = true; p.chargeValue = 0; } else { p.chargeValue += gameState.currentDiff.aiChargeSpeed; if (p.chargeValue > (0.4 + Math.random()*0.6)) { shootCharge(p, p.chargeValue); p.isCharging = false; p.chargeValue = 0; p.lastShot = now; } } } 
+                                }
                             } else { if (p.isCharging) { shootCharge(p, p.chargeValue); p.isCharging = false; p.chargeValue = 0; p.lastShot = now; } else { p.isCharging = false; p.chargeValue = 0; } }
                         }
                     } else {
-                        if (keys[leftKey]) { vX = -speed; p.facing = -1; }
-                        if (keys[rightKey]) { vX = speed; p.facing = 1; }
+                        // PLAYER CONTROLS
+                        if (keys[leftKey]) { vX = -speed; p.facing = -1; p.stepAnim++; }
+                        if (keys[rightKey]) { vX = speed; p.facing = 1; p.stepAnim++; }
                         if (keys[shieldKey]) { if (now - p.lastShieldTime > 10000) { if (!p.isShielding) { p.isShielding = true; p.shieldStartTime = now; } if (now - p.shieldStartTime > 5000) { explodeShield(p); p.isShielding = false; p.lastShieldTime = now; } } } else { if (p.isShielding) { p.isShielding = false; p.lastShieldTime = now; } }
+                        
                         if (!p.isShielding) {
                             if (keys[shootKey]) {
                                 let humanChargeSpeed = 0.003; if (gameState.mode === 'AI' && gameState.currentDiff.name === 'HELL WAY') humanChargeSpeed = 0.015; 
+                                
+                                // LOGIC BẮN ĐẠN CÁC LOẠI
                                 if (p.weapon === 'C4') { if (p.activeC4) { if (!p.isHoldingTrigger) { p.isHoldingTrigger = true; detonateC4(p); } } else { if (!p.isCharging) { p.isCharging = true; p.chargeValue = 0.1; } else if (p.chargeValue < 1.0) { p.chargeValue += humanChargeSpeed; } } }
-                                else if (p.weapon === 'INFERNO') { if (!p.isCharging) { p.isCharging = true; p.chargeValue = 0.1; } else if (p.chargeValue < 1.0) { p.chargeValue += humanChargeSpeed; } shootContinuous(p, now); }
+                                else if (p.weapon === 'INFERNO' || p.weapon === 'LASER') { if (!p.isCharging) { p.isCharging = true; p.chargeValue = 0.1; } else if (p.chargeValue < 1.0) { p.chargeValue += humanChargeSpeed; } shootContinuous(p, now); }
                                 else if (p.weapon === 'BLADE') { if (now - p.lastShot > p.stats.rate) { if (!p.isCharging) { p.isCharging = true; p.chargeValue = 0.1; } else if (p.chargeValue < 1.0) { p.chargeValue += humanChargeSpeed; } } }
                                 else if (p.weapon === 'M60') { shootContinuous(p, now); } 
                                 else { if (now - p.lastShot > p.stats.rate) { if (!p.isCharging) { p.isCharging = true; p.chargeValue = 0.1; } else if (p.chargeValue < 1.0) { p.chargeValue += humanChargeSpeed; } } }
                             } else {
                                 p.isHoldingTrigger = false;
-                                if (p.weapon === 'INFERNO') { p.chargeValue = 0; }
+                                if (p.weapon === 'INFERNO' || p.weapon === 'LASER') { p.chargeValue = 0; }
                                 else if (p.weapon === 'C4') { if (p.isCharging) { throwC4(p, now, p.chargeValue); p.isCharging = false; p.chargeValue = 0; p.lastShot = now; } }
                                 else if (p.weapon === 'BLADE') { if (p.isCharging) { if (p.chargeValue > 0.3) { shootBladeWave(p, p.chargeValue); } else { swingBlade(p, now); } p.isCharging = false; p.chargeValue = 0; p.lastShot = now; } }
                                 else if (p.weapon === 'M60') p.spinUpTime = Math.max(p.spinUpTime - 100, 0);
@@ -426,13 +433,16 @@
             Render.run(render); runner = Runner.create(); Runner.run(runner, engine);
         }
 
-        // ... MOVEMENT & COMBAT LOGIC SAME AS BEFORE ...
+        // --- MOVEMENT & COMBAT LOGIC ---
         function handleJump(code) { players.forEach(p => { if (p.hp<=0 || (gameState.mode==='AI'&&p.id===2)) return; let jk=''; if(p.id===1)jk='KeyW'; if(p.id===2)jk='ArrowUp'; if(p.id===3)jk='KeyI'; if(p.id===4)jk='KeyT'; if(code===jk && p.jumpCount<2){ Body.setVelocity(p.body,{x:p.body.velocity.x,y:-12}); p.jumpCount++; } }); }
         function handleDash(code) { const now = Date.now(); players.forEach(p => { if (p.hp<=0 || (gameState.mode==='AI'&&p.id===2)) return; let dashKey = ''; if(p.id === 1) dashKey = 'KeyQ'; if(p.id === 2) dashKey = 'ShiftRight'; if (code === dashKey) { if (now - p.lastDash > 1500) { p.isDashing = true; p.dashEndTime = now + 200; p.lastDash = now; } } }); }
         
         function createPlayer(x, y, color, weapon, id) {
+            // Hitbox
             const body = Bodies.rectangle(x, y, 30, 60, { inertia: Infinity, frictionAir: 0.05, friction: 0, label: `Player${id}` });
             Composite.add(engine.world, body);
+            
+            // Weapon Stats
             let wStats = { damage: 10, rate: 500, speed: 15, color: 'white' };
             if(weapon === 'AA-12') wStats = { damage: 4, rate: 600, speed: 15, color: '#e74c3c' }; 
             if(weapon === 'M60') wStats = { damage: 6, rate: 0, speed: 20, color: '#f1c40f' };
@@ -440,11 +450,16 @@
             if(weapon === 'INFERNO') wStats = { damage: 1.5, rate: 50, speed: 8, color: '#42f5e0' };
             if(weapon === 'BLADE') wStats = { damage: 40, rate: 500, speed: 0, color: '#2ecc71' };
             if(weapon === 'C4') wStats = { damage: 80, rate: 500, speed: 10, color: '#9b59b6' };
+            // --- TÍNH NĂNG MỚI: LASER STATS ---
+            if(weapon === 'LASER') wStats = { damage: 2, rate: 20, speed: 60, color: '#ff00ff' };
+
             let diffLevel = (gameState.mode === 'AI') ? gameState.currentDiff.level : 1;
             if (id === 1) { wStats.rate *= 0.6; wStats.damage *= (1 + (diffLevel * 0.04)); }
             if (id === 2 && gameState.mode === 'AI') { wStats.rate *= gameState.currentDiff.aiCooldownMult; wStats.damage = (wStats.damage * 0.8) * (1 + (diffLevel * 0.02)); }
             let currentHp = 100; if (id === 2 && gameState.mode === 'AI') currentHp = gameState.currentDiff.aiHp;
-            return { id, body, color, weapon, stats: wStats, hp: currentHp, maxHp: currentHp, facing: 1, jumpCount: 0, reactionTimer: 0, isCharging: false, chargeValue: 0, lastShot: 0, spinUpTime: 0, activeC4: null, bladeVisual: 0, isHoldingTrigger: false, lastDash: 0, isDashing: false, dashEndTime: 0, isShielding: false, shieldStartTime: 0, lastShieldTime: 0 };
+            
+            // Added 'stepAnim' property for animation
+            return { id, body, color, weapon, stats: wStats, hp: currentHp, maxHp: currentHp, facing: 1, jumpCount: 0, reactionTimer: 0, isCharging: false, chargeValue: 0, lastShot: 0, spinUpTime: 0, activeC4: null, bladeVisual: 0, isHoldingTrigger: false, lastDash: 0, isDashing: false, dashEndTime: 0, isShielding: false, shieldStartTime: 0, lastShieldTime: 0, stepAnim: 0 };
         }
 
         // COIN REWARD LOGIC
@@ -456,12 +471,10 @@
                 let msg = "";
                 
                 if (winner.id === 1 && gameState.mode === 'AI') {
-                    // Player 1 Won vs AI
                     if (gameState.currentDiff.name === 'HELL WAY') reward = 300;
                     else reward = 100;
                     msg = `YOU WON! +${reward} COINS`;
                 } else if (winner.id === 2 && gameState.mode === 'AI') {
-                    // AI Won
                     reward = 10;
                     msg = `DEFEAT! +${reward} COINS`;
                 } else {
@@ -477,16 +490,124 @@
             }
         }
 
-        // ... REMAINING FUNCTIONS (Shoot, Hit, Draw) SAME AS BEFORE ...
         function explodeShield(p) { const blastRadius = 250; const damage = 20; p.shieldBurstVisual = 10; players.forEach(target => { if (target.id !== p.id && target.hp > 0) { const dist = Vector.magnitude(Vector.sub(p.body.position, target.body.position)); if (dist < blastRadius) { target.hp -= damage; const forceDir = Vector.normalise(Vector.sub(target.body.position, p.body.position)); Body.applyForce(target.body, target.body.position, Vector.mult(forceDir, 0.5)); if (target.hp <= 0) checkWin(); } } }); }
-        function shootCharge(p, power) { const baseSpeed = p.stats.speed * 0.5; const finalSpeed = baseSpeed + (p.stats.speed * power); const arcY = (Math.random() * -2) - (power * 5); if (p.weapon === 'AA-12') { for (let i = 0; i < 6; i++) { const bx = p.body.position.x + (25 * p.facing); const by = p.body.position.y - 5; const bullet = Bodies.circle(bx, by, 3, { label: 'Bullet', damage: p.stats.damage, ownerId: p.id, frictionAir: 0, collisionFilter: { group: -1 }, render: { fillStyle: p.stats.color } }); const spreadY = ((Math.random() - 0.5) * 8) + arcY; Body.setVelocity(bullet, { x: (finalSpeed + (Math.random()-0.5)*2) * p.facing, y: spreadY }); Composite.add(engine.world, bullet); setTimeout(() => { Composite.remove(engine.world, bullet); }, 1000 + (power * 1000)); } } else { const bx = p.body.position.x + (25 * p.facing); const by = p.body.position.y - 5; const bullet = Bodies.circle(bx, by, 4, { label: 'Bullet', damage: p.stats.damage, ownerId: p.id, frictionAir: 0.005, collisionFilter: { group: -1 }, render: { fillStyle: p.stats.color } }); Body.setVelocity(bullet, { x: finalSpeed * p.facing, y: arcY + (Math.random() - 0.5) }); Composite.add(engine.world, bullet); setTimeout(() => { Composite.remove(engine.world, bullet); }, 1500 + (power * 1500)); } }
-        function shootContinuous(p, now) { if (p.weapon === 'M60') { p.spinUpTime = Math.min(p.spinUpTime + 16.6, 5000); const progress = p.spinUpTime / 5000; const currentRate = 300 - (220 * progress); if (now - p.lastShot > currentRate) { const speed = 15 + (15 * progress); const spreadFactor = 3.0 - (2.5 * progress); const spreadY = (Math.random() - 0.5) * spreadFactor * 2; const bx = p.body.position.x + (35 * p.facing); const by = p.body.position.y - 2; const bullet = Bodies.circle(bx, by, 3, { label: 'Bullet', damage: p.stats.damage, ownerId: p.id, frictionAir: 0, collisionFilter: { group: -1 }, render: { fillStyle: (progress > 0.8) ? '#fff' : p.stats.color } }); Body.setVelocity(bullet, { x: speed * p.facing, y: spreadY }); Composite.add(engine.world, bullet); setTimeout(() => { Composite.remove(engine.world, bullet); }, 1500); p.lastShot = now; } } else if (p.weapon === 'INFERNO') { if (now - p.lastShot > p.stats.rate) { const currentCharge = p.chargeValue || 0.1; const fireSpeed = p.stats.speed + (12 * currentCharge); for(let i=0; i<2; i++) { const bx = p.body.position.x + (30 * p.facing); const by = p.body.position.y; const part = Bodies.circle(bx, by, 4 + Math.random()*3, { label: 'InfernoFlame', damage: p.stats.damage, ownerId: p.id, frictionAir: 0.05, collisionFilter: { group: -1 }, isSensor: true, render: { fillStyle: '#42f5e0' } }); Body.setVelocity(part, { x: (fireSpeed + Math.random()*2) * p.facing, y: (Math.random()-0.5)*3 }); Composite.add(engine.world, part); setTimeout(() => { if(!part.isTrap) Composite.remove(engine.world, part); }, 600 + (currentCharge * 400)); } p.lastShot = now; } } }
+        
+        function shootCharge(p, power) { const baseSpeed = p.stats.speed * 0.5; const finalSpeed = baseSpeed + (p.stats.speed * power); const arcY = (Math.random() * -2) - (power * 5); 
+            // Điều chỉnh vị trí bắn cho khớp với hình vẽ mới (x+25, y-6)
+            const bx = p.body.position.x + (25 * p.facing); const by = p.body.position.y - 6;
+            
+            if (p.weapon === 'AA-12') { for (let i = 0; i < 6; i++) { const bullet = Bodies.circle(bx, by, 3, { label: 'Bullet', damage: p.stats.damage, ownerId: p.id, frictionAir: 0, collisionFilter: { group: -1 }, render: { fillStyle: p.stats.color } }); const spreadY = ((Math.random() - 0.5) * 8) + arcY; Body.setVelocity(bullet, { x: (finalSpeed + (Math.random()-0.5)*2) * p.facing, y: spreadY }); Composite.add(engine.world, bullet); setTimeout(() => { Composite.remove(engine.world, bullet); }, 1000 + (power * 1000)); } } 
+            else { const bullet = Bodies.circle(bx, by, 4, { label: 'Bullet', damage: p.stats.damage, ownerId: p.id, frictionAir: 0.005, collisionFilter: { group: -1 }, render: { fillStyle: p.stats.color } }); Body.setVelocity(bullet, { x: finalSpeed * p.facing, y: arcY + (Math.random() - 0.5) }); Composite.add(engine.world, bullet); setTimeout(() => { Composite.remove(engine.world, bullet); }, 1500 + (power * 1500)); } }
+        
+        function shootContinuous(p, now) {
+            // Điều chỉnh vị trí bắn
+            const bx = p.body.position.x + (25 * p.facing); const by = p.body.position.y - 6;
+
+            // --- TÍNH NĂNG MỚI: LASER LOGIC ---
+            if (p.weapon === 'LASER') {
+                if (now - p.lastShot > p.stats.rate) {
+                    const photon = Bodies.circle(bx, by, 3, { label: 'Bullet', damage: p.stats.damage, ownerId: p.id, frictionAir: 0, isSensor: true, collisionFilter: { group: -1 }, render: { fillStyle: p.stats.color } });
+                    Body.setVelocity(photon, { x: p.stats.speed * p.facing, y: 0 });
+                    Composite.add(engine.world, photon);
+                    setTimeout(() => { Composite.remove(engine.world, photon); }, 300);
+                    p.lastShot = now;
+                }
+            }
+            else if (p.weapon === 'M60') { p.spinUpTime = Math.min(p.spinUpTime + 16.6, 5000); const progress = p.spinUpTime / 5000; const currentRate = 300 - (220 * progress); if (now - p.lastShot > currentRate) { const speed = 15 + (15 * progress); const spreadFactor = 3.0 - (2.5 * progress); const spreadY = (Math.random() - 0.5) * spreadFactor * 2; const bullet = Bodies.circle(bx, by, 3, { label: 'Bullet', damage: p.stats.damage, ownerId: p.id, frictionAir: 0, collisionFilter: { group: -1 }, render: { fillStyle: (progress > 0.8) ? '#fff' : p.stats.color } }); Body.setVelocity(bullet, { x: speed * p.facing, y: spreadY }); Composite.add(engine.world, bullet); setTimeout(() => { Composite.remove(engine.world, bullet); }, 1500); p.lastShot = now; } } 
+            else if (p.weapon === 'INFERNO') { if (now - p.lastShot > p.stats.rate) { const currentCharge = p.chargeValue || 0.1; const fireSpeed = p.stats.speed + (12 * currentCharge); for(let i=0; i<2; i++) { const part = Bodies.circle(bx, by, 4 + Math.random()*3, { label: 'InfernoFlame', damage: p.stats.damage, ownerId: p.id, frictionAir: 0.05, collisionFilter: { group: -1 }, isSensor: true, render: { fillStyle: '#42f5e0' } }); Body.setVelocity(part, { x: (fireSpeed + Math.random()*2) * p.facing, y: (Math.random()-0.5)*3 }); Composite.add(engine.world, part); setTimeout(() => { if(!part.isTrap) Composite.remove(engine.world, part); }, 600 + (currentCharge * 400)); } p.lastShot = now; } } 
+        }
+        
         function swingBlade(p, now) { p.lastShot = now; p.bladeVisual = 10; players.forEach(target => { if (target.id !== p.id && target.hp > 0) { const dist = Vector.magnitude(Vector.sub(p.body.position, target.body.position)); if (dist < 80) { const dx = target.body.position.x - p.body.position.x; if ((p.facing === 1 && dx > 0) || (p.facing === -1 && dx < 0)) { target.hp -= p.stats.damage; Body.applyForce(target.body, target.body.position, { x: 0.2 * p.facing, y: -0.1 }); if (target.hp <= 0) checkWin(); } } } }); }
+        
         function shootBladeWave(p, power) { const bx = p.body.position.x + (40 * p.facing); const by = p.body.position.y; const isMaxCharge = (power >= 0.95); const wave = Bodies.rectangle(bx, by, 10, 40, { label: 'BladeWave', damage: p.stats.damage * (1 + power), ownerId: p.id, isSensor: true, isWallPass: isMaxCharge, frictionAir: 0, render: { fillStyle: '#2ecc71' } }); Body.setVelocity(wave, { x: 25 * p.facing, y: 0 }); Composite.add(engine.world, wave); setTimeout(() => { Composite.remove(engine.world, wave); }, 1000); }
+        
         function throwC4(p, now, power) { if (now - p.lastShot < p.stats.rate) return; p.lastShot = now; const finalSpeed = 10 + (10 * power); const bx = p.body.position.x + (20 * p.facing); const by = p.body.position.y - 10; const bomb = Bodies.rectangle(bx, by, 10, 5, { label: 'C4', ownerId: p.id, friction: 1, restitution: 0, render: { fillStyle: p.stats.color } }); bomb.chargeLevel = power; Body.setVelocity(bomb, { x: finalSpeed * p.facing, y: -5 - (power * 5) }); Composite.add(engine.world, bomb); p.activeC4 = bomb; }
+        
         function detonateC4(p) { if (!p.activeC4) return; const bPos = p.activeC4.position; const power = p.activeC4.chargeLevel || 0.1; const blastRadius = 100 + (150 * power); const maxDamage = p.stats.damage * (1 + power); players.forEach(target => { if (target.hp > 0) { const dist = Vector.magnitude(Vector.sub(bPos, target.body.position)); if (dist < blastRadius) { const dmg = maxDamage * (1 - (dist/blastRadius)); target.hp -= dmg; const forceDir = Vector.normalise(Vector.sub(target.body.position, bPos)); Body.applyForce(target.body, target.body.position, Vector.mult(forceDir, 0.3 + (power * 0.3))); if (target.hp <= 0) checkWin(); } } }); Composite.remove(engine.world, p.activeC4); p.activeC4 = null; }
-        function checkBulletHit(bA, bB) { let bullet, target; if (['Bullet', 'InfernoFlame', 'BladeWave', 'C4'].includes(bA.label)) { bullet = bA; target = bB; } else if (['Bullet', 'InfernoFlame', 'BladeWave', 'C4'].includes(bB.label)) { bullet = bB; target = bA; } if (bullet) { if (bullet.label === 'InfernoFlame' && target.label === 'Wall') { if (!bullet.isTrap) { bullet.isTrap = true; Body.setStatic(bullet, true); setTimeout(() => { Composite.remove(engine.world, bullet); }, 3000); } return; } if (target.label.startsWith('Player')) { const id = parseInt(target.label.replace('Player', '')); if (id !== bullet.ownerId) { const victim = players.find(p => p.id === id); if (victim) { if (victim.isShielding) { let blocked = true; if (bullet.label === 'InfernoFlame' && bullet.isTrap) blocked = false; if (bullet.label === 'C4' && bullet.chargeLevel >= 0.95) blocked = false; if (blocked) { if(bullet.label !== 'C4') Composite.remove(engine.world, bullet); return; } } victim.hp -= bullet.damage; if (victim.hp <= 0) checkWin(); if (!bullet.isTrap && bullet.label !== 'BladeWave') Composite.remove(engine.world, bullet); } } } else if (target.label === 'Wall' && !bullet.isTrap && bullet.label !== 'C4' && !bullet.isWallPass) { Composite.remove(engine.world, bullet); } } }
-        function drawCharacter(ctx, p) { const { x, y } = p.body.position; const now = Date.now(); if (p.isShielding) { ctx.strokeStyle = `rgba(52, 152, 219, ${0.5 + (now - p.shieldStartTime)/10000})`; ctx.lineWidth = 4; ctx.beginPath(); ctx.arc(x, y, 40, 0, Math.PI*2); ctx.stroke(); if (now - p.shieldStartTime > 4000) { ctx.fillStyle = ((Math.floor(now/100)%2)===0) ? 'white' : '#e74c3c'; ctx.beginPath(); ctx.arc(x, y, 10, 0, Math.PI*2); ctx.fill(); } } if (p.shieldBurstVisual > 0) { ctx.strokeStyle = 'white'; ctx.lineWidth = 10; ctx.beginPath(); ctx.arc(x, y, 200, 0, Math.PI*2); ctx.stroke(); p.shieldBurstVisual--; } ctx.fillStyle = '#c0392b'; ctx.fillRect(x-20, y-50, 40, 5); ctx.fillStyle = '#2ecc71'; ctx.fillRect(x-20, y-50, 40 * Math.max(0, p.hp / p.maxHp), 5); if (now - p.lastDash < 1500) { ctx.fillStyle = '#3498db'; ctx.fillRect(x-20, y-42, 40 * ((now - p.lastDash)/1500), 3); } else { ctx.fillStyle = '#3498db'; ctx.fillRect(x-20, y-42, 40, 3); } if (now - p.lastShieldTime < 10000) { ctx.fillStyle = '#9b59b6'; ctx.fillRect(x-20, y-34, 40 * ((now - p.lastShieldTime)/10000), 3); } else { ctx.fillStyle = '#9b59b6'; ctx.fillRect(x-20, y-34, 40, 3); } if (p.weapon === 'M60' && p.spinUpTime > 0) { ctx.fillStyle = '#7f8c8d'; ctx.fillRect(x-20, y-60, 40, 4); ctx.fillStyle = '#e67e22'; ctx.fillRect(x-20, y-60, 40 * (p.spinUpTime/5000), 4); } else if ((p.weapon === 'AA-12' || p.weapon === 'SKS' || p.weapon === 'C4' || p.weapon === 'INFERNO' || p.weapon === 'BLADE') && p.isCharging) { ctx.fillStyle = '#7f8c8d'; ctx.fillRect(x-20, y-60, 40, 4); ctx.fillStyle = '#f1c40f'; ctx.fillRect(x-20, y-60, 40 * p.chargeValue, 4); } else if (p.weapon === 'C4' && p.activeC4) { ctx.fillStyle = '#8e44ad'; ctx.font = "10px Arial Black"; ctx.fillText("ACTIVE", x-15, y-60); } if (p.bladeVisual > 0) { ctx.strokeStyle = p.stats.color; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(x, y, 50, (p.facing===1?-0.5:2.5), (p.facing===1?0.5:3.5)); ctx.stroke(); p.bladeVisual--; } ctx.translate(x, y); ctx.fillStyle = p.color; ctx.fillRect(-10, -20, 20, 40); ctx.beginPath(); ctx.arc(0, -30, 12, 0, Math.PI*2); ctx.fill(); const isMoving = Math.abs(p.body.velocity.x) > 0.5; const step = isMoving ? Math.sin(Date.now()/100)*10 : 0; ctx.lineWidth = 5; ctx.strokeStyle = p.color; ctx.beginPath(); ctx.moveTo(-5, 20); ctx.lineTo(-10+step, 35); ctx.stroke(); ctx.beginPath(); ctx.moveTo(5, 20); ctx.lineTo(10-step, 35); ctx.stroke(); ctx.fillStyle = p.stats.color; if(p.weapon === 'BLADE') { ctx.beginPath(); ctx.moveTo(10*p.facing, 0); ctx.lineTo(40*p.facing, 0); ctx.lineWidth = 4; ctx.strokeStyle = (p.isCharging ? 'white' : '#2ecc71'); ctx.stroke(); } else if (p.weapon === 'INFERNO') { ctx.fillRect(10*p.facing, -2, 20*p.facing, 12); } else { ctx.fillRect(10*p.facing, -5, 25*p.facing, 8); } ctx.translate(-x, -y); }
+        
+        function checkBulletHit(bA, bB) { let bullet, target; if (['Bullet', 'InfernoFlame', 'BladeWave', 'C4'].includes(bA.label)) { bullet = bA; target = bB; } else if (['Bullet', 'InfernoFlame', 'BladeWave', 'C4'].includes(bB.label)) { bullet = bB; target = bA; } if (bullet) { if (bullet.label === 'InfernoFlame' && target.label === 'Wall') { if (!bullet.isTrap) { bullet.isTrap = true; Body.setStatic(bullet, true); setTimeout(() => { Composite.remove(engine.world, bullet); }, 3000); } return; } if (target.label.startsWith('Player')) { const id = parseInt(target.label.replace('Player', '')); if (id !== bullet.ownerId) { const victim = players.find(p => p.id === id); if (victim) { if (victim.isShielding) { let blocked = true; if (bullet.label === 'InfernoFlame' && bullet.isTrap) blocked = false; if (bullet.label === 'C4' && bullet.chargeLevel >= 0.95) blocked = false; if (blocked) { if(bullet.label !== 'C4') Composite.remove(engine.world, bullet); return; } } victim.hp -= bullet.damage; if (victim.hp <= 0) checkWin(); if (!bullet.isTrap && bullet.label !== 'BladeWave' && !bullet.isSensor) Composite.remove(engine.world, bullet); } } } else if (target.label === 'Wall' && !bullet.isTrap && bullet.label !== 'C4' && !bullet.isWallPass && !bullet.isSensor) { Composite.remove(engine.world, bullet); } } }
+        
+        // --- 5. ADVANCED DRAWING SYSTEM (TÍNH NĂNG MỚI: SỬA HÌNH ẢNH NHÂN VẬT) ---
+        function drawCharacter(ctx, p) { 
+            const { x, y } = p.body.position; 
+            const now = Date.now(); 
+            
+            ctx.translate(x, y); // Dời gốc tọa độ về tâm nhân vật
+
+            // --- 1. VẼ HIỆU ỨNG CŨ (Khiên, Dash) ---
+            if (p.isShielding) { 
+                ctx.strokeStyle = `rgba(52, 152, 219, ${0.5 + (now - p.shieldStartTime)/10000})`; ctx.lineWidth = 4; 
+                ctx.beginPath(); ctx.arc(0, 0, 40, 0, Math.PI*2); ctx.stroke(); 
+                if (now - p.shieldStartTime > 4000) { ctx.fillStyle = ((Math.floor(now/100)%2)===0) ? 'white' : '#e74c3c'; ctx.beginPath(); ctx.arc(0, 0, 10, 0, Math.PI*2); ctx.fill(); } 
+            } 
+            if (p.shieldBurstVisual > 0) { 
+                ctx.strokeStyle = 'white'; ctx.lineWidth = 10; ctx.beginPath(); ctx.arc(0, 0, 200, 0, Math.PI*2); ctx.stroke(); p.shieldBurstVisual--; 
+            }
+            if (now - p.lastDash < 1500 && p.isDashing) {
+                // Hiệu ứng lướt (đơn giản)
+                ctx.fillStyle = 'rgba(255,255,255,0.3)';
+                ctx.fillRect(-20 - (10*p.facing), -30, 30, 60);
+            }
+
+            // --- 2. VẼ NHÂN VẬT (MỚI) ---
+            ctx.fillStyle = p.color;
+            // Chân (Hoạt ảnh)
+            const step = Math.sin(p.stepAnim * 0.5) * 10;
+            ctx.strokeStyle = p.color; ctx.lineWidth = 6;
+            ctx.beginPath(); ctx.moveTo(-5, 20); ctx.lineTo(-10 + step, 45); ctx.stroke(); // Chân sau
+            ctx.beginPath(); ctx.moveTo(5, 20);  ctx.lineTo(10 - step, 45);  ctx.stroke(); // Chân trước
+            // Thân
+            ctx.fillRect(-12, -20, 24, 45);
+            // Đầu
+            ctx.beginPath(); ctx.arc(0, -30, 14, 0, Math.PI*2); ctx.fill();
+            // Kính
+            ctx.fillStyle = '#fff'; ctx.fillRect(4 * p.facing, -34, 10 * p.facing, 4);
+
+            // --- 3. VẼ VŨ KHÍ (Căn chỉnh lại vị trí nòng súng: x=25, y=-6) ---
+            ctx.fillStyle = p.stats.color;
+            if (p.weapon === 'BLADE') {
+                ctx.fillRect(5 * p.facing, -5, 10 * p.facing, 5); // Cán kiếm
+                 if (p.bladeVisual > 0) { 
+                    ctx.strokeStyle = p.stats.color; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(0, 0, 50, (p.facing===1?-0.5:2.5), (p.facing===1?0.5:3.5)); ctx.stroke(); p.bladeVisual--; 
+                } else {
+                    ctx.beginPath(); ctx.moveTo(10*p.facing, -5); ctx.lineTo(15*p.facing, -35); ctx.lineTo(25*p.facing, -5); ctx.fill();
+                }
+            } else {
+                // SÚNG
+                ctx.fillStyle = '#333'; ctx.fillRect(5 * p.facing, -10, 20 * p.facing, 8); // Thân súng
+                ctx.fillStyle = p.stats.color; ctx.fillRect(25 * p.facing, -10, 5 * p.facing, 8); // Nòng súng
+
+                // HIỆU ỨNG LASER (TÍNH NĂNG MỚI)
+                if (p.weapon === 'LASER' && (keys[p.id===1?'Space':'Enter'] || (p.id>1 && p.reactionTimer>0 && Math.random()<0.5))) {
+                     ctx.strokeStyle = '#ff00ff'; ctx.lineWidth = 3; ctx.shadowBlur = 10; ctx.shadowColor = '#ff00ff';
+                     ctx.beginPath(); ctx.moveTo(25 * p.facing, -6); ctx.lineTo(1000 * p.facing, -6); ctx.stroke(); ctx.shadowBlur = 0;
+                }
+            }
+
+            // --- 4. VẼ THANH TRẠNG THÁI (Giữ nguyên logic cũ nhưng dời vị trí lên đầu) ---
+            // HP Bar
+            ctx.fillStyle = '#c0392b'; ctx.fillRect(-20, -50, 40, 5); 
+            ctx.fillStyle = '#2ecc71'; ctx.fillRect(-20, -50, 40 * Math.max(0, p.hp / p.maxHp), 5);
+            
+            // Thanh Dash / Shield Cooldown
+            if (now - p.lastDash < 1500) { ctx.fillStyle = '#3498db'; ctx.fillRect(-20, -42, 40 * ((now - p.lastDash)/1500), 3); } 
+            else { ctx.fillStyle = '#3498db'; ctx.fillRect(-20, -42, 40, 3); } 
+            if (now - p.lastShieldTime < 10000) { ctx.fillStyle = '#9b59b6'; ctx.fillRect(-20, -34, 40 * ((now - p.lastShieldTime)/10000), 3); } 
+            else { ctx.fillStyle = '#9b59b6'; ctx.fillRect(-20, -34, 40, 3); } 
+
+            // Thanh gồng đạn (Charge bar)
+            if (p.weapon === 'M60' && p.spinUpTime > 0) { 
+                ctx.fillStyle = '#7f8c8d'; ctx.fillRect(-20, -60, 40, 4); 
+                ctx.fillStyle = '#e67e22'; ctx.fillRect(-20, -60, 40 * (p.spinUpTime/5000), 4); 
+            } else if ((p.weapon === 'AA-12' || p.weapon === 'SKS' || p.weapon === 'C4' || p.weapon === 'INFERNO' || p.weapon === 'BLADE') && p.isCharging) { 
+                ctx.fillStyle = '#7f8c8d'; ctx.fillRect(-20, -60, 40, 4); 
+                ctx.fillStyle = '#f1c40f'; ctx.fillRect(-20, -60, 40 * p.chargeValue, 4); 
+            } else if (p.weapon === 'C4' && p.activeC4) { 
+                ctx.fillStyle = '#8e44ad'; ctx.font = "10px Arial Black"; ctx.fillText("ACTIVE", -15, -60); 
+            }
+
+            ctx.translate(-x, -y); // Trả lại gốc tọa độ
+        }
     </script>
 </body>
 </html>
